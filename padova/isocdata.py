@@ -7,6 +7,7 @@ and split them into individual isochrones.
 
 import linecache
 
+import numpy as np
 from astropy.table import Table
 
 
@@ -19,6 +20,8 @@ class IsochroneTable(object):
     metadata : list
         List of lines from the metadata found at the top of the ischrone
         table file.
+    isochrones : list
+        List of :class:`Isochrone` instances read from the table.
 
     Parameters
     ----------
@@ -29,12 +32,14 @@ class IsochroneTable(object):
     def __init__(self, fname):
         super(IsochroneTable, self).__init__()
         self.fname = fname
+        self._read()
 
     def _read(self):
         """Read isochrone table and create Isochrone instances."""
         start_indices = self._prescan_table()
         self._isochrone_specs = self._read_isochrone_specs(start_indices)
         self.metadata = self._read_metadata(0, start_indices[0])
+        self.isochrones = self._read_isochrones(start_indices)
         linecache.clearcache()
 
     def _prescan_table(self):
@@ -79,6 +84,60 @@ class IsochroneTable(object):
         # Add another to get the header, rather than the age/Z metadata.
         hdr = linecache.getline(self.fname, i + 2).lstrip('#').rstrip().split()
         return hdr
+
+    def _read_isochrones(self, start_indices):
+        """Extract isochrones from the table, creating individual
+        :class:`Isochrone` instances.
+        """
+        isocs = []
+        for i, (start_index, meta) in enumerate(
+                zip(start_indices, self._isochrone_specs)):
+            if i < len(start_indices) - 1:
+                end_index = start_indices[i + 1]
+            else:
+                end_index = self._linecount()
+            # print start_index, end_index
+            tbl = self._read_isochrone(start_index, end_index)
+            # print tbl
+            isocs.append(tbl)
+        return isocs
+    
+    def _linecount(self):
+        """Count lines in isochrone table, via the Python Cookbook."""
+        count = -1
+        for count, line in enumerate(open(self.fname, 'rU')):
+            pass
+            count += 1
+        return count
+
+    def _read_isochrone(self, start_index, end_index):
+        """Read a single isochrone, between `start_index` and `end_index`."""
+        header = self._read_header(start_index)
+        dt = []
+        for cname in header:
+            if cname == 'stage':
+                dt.append((cname, 'S40'))
+            elif cname == 'pmode':
+                dt.append((cname, np.int))
+            else:
+                dt.append((cname, np.float))
+        ncols = len(dt)
+        data = np.empty(end_index - start_index - 2, dtype=np.dtype(dt))
+        for j, i in enumerate(xrange(start_index + 2, end_index)):
+            parts = linecache.getline(self.fname, i + 1).rstrip('\n').split()
+            # print parts
+            if len(parts) == ncols - 1:
+                parts.append(' ')  # likely missing a 'stage' column here
+            for val, (cname, typ) in zip(parts, dt):
+                if typ == np.float:
+                    data[cname][j] = float(val)
+                elif typ == np.int:
+                    data[cname][j] = int(val)
+                else:
+                    data[cname][j] = val
+        tbl = Table(data)
+        print tbl
+        return tbl
 
 
 def main():

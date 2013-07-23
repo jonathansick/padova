@@ -10,7 +10,7 @@ from ..isocdata import IsochroneTable
 
 
 def test_prescan():
-    """Test reading an ischrone table."""
+    """Test the pre-scan done by IsochroneTable."""
     datpath = get_pkg_data_filename('../data/isocz0120.dat')
     print datpath
     isoctable = IsochroneTable(datpath)
@@ -18,3 +18,10 @@ def test_prescan():
     isoctable._read_isochrone_specs(start_lines)
     assert start_lines[0] == 11
     assert len(start_lines) == 71
+
+def test_read_isochrones():
+    """Test reading an isochrone table."""
+    datpath = get_pkg_data_filename('../data/isocz0120.dat')
+    print datpath
+    isoctable = IsochroneTable(datpath)
+    assert len(isoctable.isochrones) == 71
