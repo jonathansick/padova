@@ -25,3 +25,15 @@ def test_read_isochrones():
     print datpath
     isoctable = IsochroneTable(datpath)
     assert len(isoctable.isochrones) == 71
+
+def test_isochrone():
+    """Test an isochrone instance"""
+    datpath = get_pkg_data_filename('../data/isocz0120.dat')
+    print datpath
+    isoctable = IsochroneTable(datpath)
+    isoc = isoctable.isochrones[0]
+    assert isinstance(isoc.z, float)
+    assert isoc.z == 0.012
+    assert isinstance(isoc.age, float)
+    assert isoc.age == 3981000.0
+    assert isinstance(isoc.info, list)
