@@ -7,6 +7,8 @@ and split them into individual isochrones.
 
 import linecache
 
+from astropy.table import Table
+
 
 class IsochroneTable(object):
     """Reads an isochrone table (output from the Padova CMD interface).
@@ -33,6 +35,7 @@ class IsochroneTable(object):
         start_indices = self._prescan_table()
         self._isochrone_specs = self._read_isochrone_specs(start_indices)
         self.metadata = self._read_metadata(0, start_indices[0])
+        linecache.clearcache()
 
     def _prescan_table(self):
         """Find lines where individual isochrones start."""
@@ -64,8 +67,18 @@ class IsochroneTable(object):
             z = float(line[4])
             age = float(line[7])
             specs.append({"Z": z, "age": age})
-        linecache.clearcache()
         return specs
+    
+    def _read_header(self, i):
+        """Parse the header for the isochrone start at line `i`.
+        
+        This method attempts to overcome some of the oddities in the
+        CMD isochrone tables.
+        """
+        # Note that linecache has 1-based lines.
+        # Add another to get the header, rather than the age/Z metadata.
+        hdr = linecache.getline(self.fname, i + 2).lstrip('#').rstrip().split()
+        return hdr
 
 
 def main():
