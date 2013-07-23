@@ -37,3 +37,13 @@ def test_isochrone():
     assert isinstance(isoc.age, float)
     assert isoc.age == 3981000.0
     assert isinstance(isoc.info, list)
+
+def test_isochrone_starfish():
+    """Test the export-for-starfish feature of Isochrone."""
+    datpath = get_pkg_data_filename('../data/isocz0120.dat')
+    print datpath
+    isoctable = IsochroneTable(datpath)
+    isoc = isoctable.isochrones[0]
+    for n, m in zip(isoc.filter_names, ['J', 'H', 'Ks']):
+        assert n == m
+    isoc.export_for_starfish("_test")
