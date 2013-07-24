@@ -199,7 +199,7 @@ class Isochrone(object):
         # Normally I'd use sets, but column ordering is important
         return [name for name in cnames if name not in non_mag_cnames]
 
-    def export_for_starfish(self, output_dir):
+    def export_for_starfish(self, output_dir, bands=None):
         """Export the isochrone in a format useful for StarFISH `mklib`.
         
         Parameters
@@ -211,13 +211,20 @@ class Isochrone(object):
             naming scheme: ``<output_dir>/zNNNN_tt.tt.dat`` where ``NNNN``
             is a 4-digit code for the metallicity (with leading zeros) and
             ``tt.tt`` is the log of the age.
+        bands : list
+            List of bands to include in isochrone output. Only necessary for
+            exporting a subset of the bands in the full isochrone dataset.
         """
         filename = "z%s_%s" % (self.z_code, self.age_code)
         output_path = os.path.join(output_dir, filename)
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         if os.path.exists(output_path): os.remove(output_path)
+        if bands is None:
+            bandnames = self.filter_names
+        else:
+            bandnames = [n for n in bands if n in self.filter_names]
         self.table.write(output_path, format='ascii.no_header', delimiter=' ',
-                include_names=['M_ini'] + self.filter_names)
+                include_names=['M_ini'] + bandnames)
 
 
 def main():
