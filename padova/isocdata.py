@@ -219,11 +219,17 @@ class Isochrone(object):
         output_path = os.path.join(output_dir, filename)
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         if os.path.exists(output_path): os.remove(output_path)
+        fmt = {'m_ini': "%10.7f"}  # table writer formatting
         if bands is None:
             bandnames = self.filter_names
+            for name in bandnames:
+                fmt[name] = "%8.6f"
         else:
             bandnames = [n for n in bands if n in self.filter_names]
-        self.table.write(output_path, format='ascii.no_header', delimiter=' ',
+        self.table.write(output_path,
+                format='ascii.fixed_width_no_header',
+                formats=fmt,
+                delimiter=' ',
                 include_names=['M_ini'] + bandnames)
 
 
