@@ -230,6 +230,8 @@ class Isochrone(object):
                 format='ascii.fixed_width_no_header',
                 formats=fmt,
                 delimiter=' ',
+                delimiter_pad=None,
+                bookend=False,
                 include_names=['M_ini'] + bandnames)
 
 
