@@ -101,28 +101,30 @@ class CMD(object):
             lf_magsup="-20.0",
             lf_deltamag="0.2"):
         super(CMD, self).__init__()
-        self.isoc_kind = isoc_kind  # Generation of evolutionary tracks
-        self.photsys_file = photsys_file
-        self.kind_cspecmag = kind_cspecmag
-        self.dust_sourceM = dust_sourceM
-        self.dust_sourceC = dust_sourceC
-        self.extinction_av = extinction_av
-        self.imf_file = imf_file
-        self.isoc_val = isoc_val
-        self.isoc_age = isoc_age
-        self.isoc_zeta = isoc_zeta
-        self.isoc_zeta0 = isoc_zeta0
-        self.isoc_lage0 = isoc_lage0
-        self.isoc_lage1 = isoc_lage1
-        self.isoc_dlage = isoc_dlage
-        self.isoc_z0 = isoc_z0
-        self.isoc_z1 = isoc_z1
-        self.isoc_dz = isoc_dz
-        self.output_evstage = output_evstage
-        self.output_gzip = output_gzip
-        self.lf_maginf = lf_maginf
-        self.lf_magsup = lf_magsup
-        self.lf_deltamag = lf_deltamag
+        self._settings = {
+                "isoc_kind": isoc_kind,
+                "photsys_file": photsys_file,
+                "kind_cspecmag": kind_cspecmag,
+                "dust_sourceM": dust_sourceM,
+                "dust_sourceC": dust_sourceC,
+                "extinction_av": extinction_av,
+                "imf_file": imf_file,
+                "isoc_val": isoc_val,
+                "isoc_age": isoc_age,
+                "isoc_zeta": isoc_zeta,
+                "isoc_zeta0": isoc_zeta0,
+                "isoc_lage0": isoc_lage0,
+                "isoc_lage1": isoc_lage1,
+                "isoc_dlage": isoc_dlage,
+                "isoc_z0": isoc_z0,
+                "isoc_z1": isoc_z1,
+                "isoc_dz": isoc_dz,
+                "output_evstage": output_evstage,
+                "output_gzip": output_gzip,
+                "lf_maginf": lf_maginf,
+                "lf_magsup": lf_magsup,
+                "lf_deltamag": lf_deltamag
+        }
 
         self._br = mechanize.Browser()
 
@@ -142,28 +144,13 @@ class CMD(object):
 
     def _fill_form(self, form):
         """Fill out controls in the form."""
-        form.set_value([self.isoc_kind], name="isoc_kind")
-        form.set_value([self.photsys_file], name="photsys_file")
-        form.set_value([self.dust_sourceM], name="dust_sourceM")
-        form.set_value([self.dust_sourceC], name="dust_sourceC")
-        form.set_value([self.extinction_av], name="extinction_av")
-        form.set_value([self.imf_file], name="imf_file")
-        form.set_value([self.isoc_val], name="isoc_val")
-        form.set_value([self.isoc_age], name="isoc_age")
-        form.set_value([self.isoc_zeta], name="isoc_zeta")
-        form.set_value([self.isoc_zeta0], name="isoc_zeta0")
-        form.set_value([self.isoc_lage0], name="isoc_lage0")
-        form.set_value([self.isoc_lage1], name="isoc_lage1")
-        form.set_value([self.isoc_dlage], name="isoc_dlage")
-        form.set_value([self.isoc_z0], name="isoc_z0")
-        form.set_value([self.isoc_z1], name="isoc_z1")
-        form.set_value([self.isoc_dz], name="isoc_dz")
+        for k, v in self._settings.iteritems():
+            if k in ['output_evstage', 'output_gzip']: continue
+            form.set_value([v], name=k)
         form.find_control("output_evstage").items[0].selected \
-                = self.output_evstage
-        form.find_control("output_gzip").items[0].selected = self.output_gzip
-        form.set_value([self.lf_maginf], name="lf_maginf")
-        form.set_value([self.lf_magsup], name="lf_magsup")
-        form.set_value([self.lf_deltamag], name="lf_deltamag")
+                = self._settings['output_evstage']
+        form.find_control("output_gzip").items[0].selected \
+                = self._settings['output_gzip']
 
 
 def main():
