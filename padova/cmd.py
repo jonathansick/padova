@@ -4,8 +4,11 @@
 Python interface to the Padova group's CMD web interface for isochrones.
 """
 
+import hashlib
 
 import mechanize
+
+from .resultcache import PadovaCache
 
 
 class CMD(object):
@@ -126,10 +129,15 @@ class CMD(object):
                 "lf_deltamag": lf_deltamag
         }
 
+        self._cache = PadovaCache()
         self._br = mechanize.Browser()
 
     def get(self):
         """Submit a form and get the result."""
+        h = self._hash_settings()
+        cache_path = self._check_cache(h)
+        if cache_path is not None:
+            return cache_path  # Perhaps return the file object instead?
         self._br.open("http://stev.oapd.inaf.it/cgi-bin/cmd")
         form = self._br.forms()[0]
         self._fill_form(form)
@@ -151,6 +159,16 @@ class CMD(object):
                 = self._settings['output_evstage']
         form.find_control("output_gzip").items[0].selected \
                 = self._settings['output_gzip']
+
+    def _hash_settings(self):
+        """Build a hash given the current settings."""
+        keys = self._settings.keys()
+        keys.sort()
+        # String to build hash against
+        obj = "".join([str(self._settings[k]) for k in keys])
+        m = hashlib.md5()
+        m.update(obj)
+        return m.hexdigest()
 
 
 def main():
