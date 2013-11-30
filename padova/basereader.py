@@ -42,7 +42,7 @@ class BaseReader(object):
         start_lines = []
         with open(self.fname) as f:
             for i, line in enumerate(f):
-                if line.startswith("#\t"):
+                if line.startswith("#\tI") or line.startswith("#\tL"):
                     start_lines.append(i)
         return start_lines
 
