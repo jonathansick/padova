@@ -12,7 +12,7 @@ class PadovaCache(object):
     """Cache manager for CMD and TRILEGAL requests."""
     def __init__(self):
         super(PadovaCache, self).__init__()
-        self._dir = os.expanduser("~/.padova_cache")
+        self._dir = os.path.expanduser("~/.padova_cache")
         if not os.path.exists(self._dir):
             os.makedirs(self._dir)
 

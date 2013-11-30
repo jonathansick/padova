@@ -99,7 +99,7 @@ class CMD(object):
             isoc_dz="0.0001",
             output_kind="0",
             output_evstage=True,
-            output_gzip=False,
+            output_gzip=True,
             lf_maginf="20.0",
             lf_magsup="-20.0",
             lf_deltamag="0.2"):
@@ -135,30 +135,40 @@ class CMD(object):
     def get(self):
         """Submit a form and get the result."""
         h = self._hash_settings()
-        cache_path = self._check_cache(h)
+        cache_path = self._cache.cached_path(h)  # test the cache
         if cache_path is not None:
             return cache_path  # Perhaps return the file object instead?
         self._br.open("http://stev.oapd.inaf.it/cgi-bin/cmd")
-        form = self._br.forms()[0]
-        self._fill_form(form)
-        request = form.click()  # mechanize.Request object
-        try:
-            response = mechanize.urlopen(request)
-        except mechanize.HTTPError, response:
-            pass
-        print response.geturl()
-        result_page = response.read()  # body
-        response.close()
+        print "self._br", self._br
+        print "self._br.forms()", self._br.forms()
+        for form in self._br.forms():
+            break  # Get first form. Can't find a good way to do this.
+        self._br.form = list(self._br.forms())[0]
+        print "form", self._br.form
+        self._fill_form()
+        # request = self._br.form.submit()  # mechanize.Request object
+        response = self._br.submit(name='submit_form', label='Submit')
+        html = response.read()
+        print "html:\n"
+        # TODO do something with the html to download result
 
-    def _fill_form(self, form):
+    def _fill_form(self):
         """Fill out controls in the form."""
+        seq_types = ['imf_file', 'photsys_file', 'isoc_kind', 'kind_cspecmag',
+                'dust_sourceM', 'dust_sourceC', 'isoc_val', 'output_kind']
         for k, v in self._settings.iteritems():
+            print k, v
             if k in ['output_evstage', 'output_gzip']: continue
-            form.set_value([v], name=k)
-        form.find_control("output_evstage").items[0].selected \
-                = self._settings['output_evstage']
-        form.find_control("output_gzip").items[0].selected \
-                = self._settings['output_gzip']
+            if k in seq_types:
+                self._br[k] = [v]
+            else:
+                self._br[k] = v
+
+        for k in ['output_evstage', 'output_gzip']:
+            if self._settings[k]:
+                self._br.find_control(k).items[0].selected = True
+            else:
+                self._br.find_control(k).items[0].selected = False
 
     def _hash_settings(self):
         """Build a hash given the current settings."""
