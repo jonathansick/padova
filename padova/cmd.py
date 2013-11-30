@@ -5,6 +5,8 @@ Python interface to the Padova group's CMD web interface for isochrones.
 """
 
 import hashlib
+from HTMLParser import HTMLParser
+from urlparse import urljoin
 
 import mechanize
 
@@ -179,6 +181,24 @@ class CMD(object):
         m = hashlib.md5()
         m.update(obj)
         return m.hexdigest()
+
+
+class CmdResponseParser(HTMLParser):
+
+    data_url = None
+
+    def handle_starttag(self, tag, attrs):
+        # print "Start tag:", tag
+        for attr in attrs:
+            # print "     attr:", attr
+            if len(attr) > 1:
+                if isinstance(attr[1], str):
+                    # Look for either gziped or plain result URL
+                    if attr[1].endswith(".dat") or attr[1].endswith(".dat.gz"):
+                        relurl = attr[1]
+                        self.data_url = urljoin(
+                                'http://stev.oapd.inaf.it/cgi-bin/cmd_2.5',
+                                relurl)
 
 
 def main():
