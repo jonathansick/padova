@@ -7,6 +7,7 @@ Python interface to the Padova group's CMD web interface for isochrones.
 import hashlib
 from HTMLParser import HTMLParser
 from urlparse import urljoin
+import urllib
 
 import mechanize
 
@@ -151,8 +152,12 @@ class CMD(object):
         # request = self._br.form.submit()  # mechanize.Request object
         response = self._br.submit(name='submit_form', label='Submit')
         html = response.read()
-        print "html:\n"
-        # TODO do something with the html to download result
+        p = CmdResponseParser()
+        p.feed(html)
+        url = p.data_url
+        filename = self._cache.generate_path(h, url)
+        self.data_path, info = urllib.urlretrieve(url, filename)
+        return self.data_path
 
     def _fill_form(self):
         """Fill out controls in the form."""
