@@ -7,12 +7,16 @@ Send a sample request to the CMD interface.
 """
 
 from padova.cmd import CMD
+from padova.isocdata import IsochroneTable
 
 
 def main():
     cmd = CMD()
     cache_path = cmd.get()
     print cache_path
+    tbl = IsochroneTable(cache_path)
+    tbl.cleanup()
+    print tbl.metadata
 
 
 if __name__ == '__main__':

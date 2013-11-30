@@ -7,6 +7,7 @@ and split them into individual isochrones.
 
 import linecache
 import os
+import gzip
 
 import numpy as np
 from astropy.table import Table
@@ -32,8 +33,27 @@ class IsochroneTable(object):
     """
     def __init__(self, fname):
         super(IsochroneTable, self).__init__()
-        self.fname = fname
+        if fname.endswith("gz"):
+            # need to make an unzipped copy
+            f = gzip.open(fname, 'rb')
+            file_content = f.read()
+            self.fname = os.path.splitext(fname)[0]
+            if os.path.exists(self.fname): os.remove(self.fname)
+            f2 = open(os.path.splitext(fname)[0], 'w')
+            f2.write(file_content)
+            f2.close()
+            f.close()
+            self._gz = True
+        else:
+            self._gz = False
         self._read()
+
+    def cleanup(self):
+        """Delete the temporary unzipped file. If the file was not originally
+        gzipped, it will not be deleted.
+        """
+        if self._gz:
+            os.remove(self.fname)
 
     def _read(self):
         """Read isochrone table and create Isochrone instances."""
