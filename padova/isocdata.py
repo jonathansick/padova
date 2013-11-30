@@ -7,13 +7,14 @@ and split them into individual isochrones.
 
 import linecache
 import os
-import gzip
 
 import numpy as np
 from astropy.table import Table
 
+from .basereader import BaseReader
 
-class IsochroneTable(object):
+
+class IsochroneTable(BaseReader):
     """Reads an isochrone table (output from the Padova CMD interface).
     
     Attributes
@@ -32,28 +33,7 @@ class IsochroneTable(object):
         Filename of isochrone table to read.
     """
     def __init__(self, fname):
-        super(IsochroneTable, self).__init__()
-        if fname.endswith("gz"):
-            # need to make an unzipped copy
-            f = gzip.open(fname, 'rb')
-            file_content = f.read()
-            self.fname = os.path.splitext(fname)[0]
-            if os.path.exists(self.fname): os.remove(self.fname)
-            f2 = open(os.path.splitext(fname)[0], 'w')
-            f2.write(file_content)
-            f2.close()
-            f.close()
-            self._gz = True
-        else:
-            self._gz = False
-        self._read()
-
-    def cleanup(self):
-        """Delete the temporary unzipped file. If the file was not originally
-        gzipped, it will not be deleted.
-        """
-        if self._gz:
-            os.remove(self.fname)
+        super(IsochroneTable, self).__init__(fname)
 
     def _read(self):
         """Read isochrone table and create Isochrone instances."""
@@ -63,26 +43,6 @@ class IsochroneTable(object):
         self.isochrones = self._read_isochrones(start_indices)
         linecache.clearcache()
 
-    def _prescan_table(self):
-        """Find lines where individual isochrones start."""
-        start_lines = []
-        with open(self.fname) as f:
-            for i, line in enumerate(f):
-                if line.startswith("#\t"):
-                    start_lines.append(i)
-        return start_lines
-
-    def _read_metadata(self, start, stop):
-        """Read the metadata header at the top of the isochrone table."""
-        metadata = []
-        with open(self.fname) as f:
-            i = 0
-            for i, line in enumerate(f):
-                if i < start: continue
-                elif i == stop: break
-                metadata.append(line.lstrip('#').rstrip('\n'))
-        return metadata
-    
     def _read_isochrone_specs(self, start_indices):
         """Produce a list of the age and metallicity specifications for
         each isochone in the table.
@@ -94,17 +54,6 @@ class IsochroneTable(object):
             age = float(line[7])
             specs.append({"Z": z, "age": age})
         return specs
-    
-    def _read_header(self, i):
-        """Parse the header for the isochrone start at line `i`.
-        
-        This method attempts to overcome some of the oddities in the
-        CMD isochrone tables.
-        """
-        # Note that linecache has 1-based lines.
-        # Add another to get the header, rather than the age/Z metadata.
-        hdr = linecache.getline(self.fname, i + 2).lstrip('#').rstrip().split()
-        return hdr
 
     def _read_isochrones(self, start_indices):
         """Extract isochrones from the table, creating individual
@@ -120,13 +69,6 @@ class IsochroneTable(object):
             isoc = self._read_isochrone(start_index, end_index, meta)
             isocs.append(isoc)
         return isocs
-    
-    def _linecount(self):
-        """Count lines in isochrone table, via the Python Cookbook."""
-        count = -1
-        for count, line in enumerate(open(self.fname, 'rU')):
-            count += 1
-        return count
 
     def _read_isochrone(self, start_index, end_index, meta):
         """Read a single isochrone, between `start_index` and `end_index`."""
