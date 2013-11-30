@@ -24,7 +24,7 @@ You can run tests via:
 
     python setup.py test
 
-The tests are located in ``padova/tests/``. Test data sets are 
+The tests are located in ``padova/tests/``.
 
 
 Info
