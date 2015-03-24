@@ -31,8 +31,8 @@ import zlib
 import hashlib
 import re
 
-from .resultcache import PadovaCache
-from .utils import file_type
+from padova.resultcache import PadovaCache
+from padova.utils import compression_type
 
 
 # interpolation
@@ -337,7 +337,7 @@ class CMDRequest(object):
             print('Downloading data...{0}'.format(url))
             bf = urlopen(url)
             r = bf.read()
-            typ = file_type(r, stream=True)
+            typ = compression_type(r, stream=True)
             if typ is not None:
                 r = zlib.decompress(bytes(r), 15 + 32)
             return r

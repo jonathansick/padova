@@ -5,7 +5,7 @@ Utilities
 """
 
 
-def file_type(filename, stream=False):
+def compression_type(filename, stream=False):
     """ Detect potential compressed file
     Returns the gz, bz2 or zip if a compression is detected, else None.
 
