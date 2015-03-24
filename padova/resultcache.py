@@ -16,28 +16,21 @@ class PadovaCache(object):
         if not os.path.exists(self._dir):
             os.makedirs(self._dir)
 
-    def generate_path(self, h, orig_url):
-        """Generate a  cache path, given the hash and the original data URL."""
-        if orig_url.endswith(".dat.gz"):
-            return os.path.join(self._dir, h + ".dat.gz")
-        elif orig_url.endswith(".dat"):
-            return os.path.join(self._dir, h + ".dat")
+    def _cache_path(self, h):
+        return os.path.join(self._dir, str(h))
 
-    def cached_path(self, h):
-        """Returns path to cached data, returns `None` if not in cache."""
-        dat_testpath = os.path.join(self._dir, h) + ".dat"
-        gz_testpath = dat_testpath + ".gz"
-        if os.path.exists(dat_testpath):
-            return dat_testpath
-        elif os.path.exists(gz_testpath):
-            return gz_testpath
-        else:
-            return None
+    def __contains__(self, h):
+        return os.path.exists(self._cache_path(h))
 
+    def __getitem__(self, h):
+        assert self.__contains__(h)
+        with open(self._cache_path(h)) as f:
+            data = f.read()
+        return data
 
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
+    def __setitem__(self, h, data):
+        p = self._cache_path(h)
+        if os.path.exists(p):
+            os.remove(p)
+        with open(p, 'w') as f:
+            f.write(data)

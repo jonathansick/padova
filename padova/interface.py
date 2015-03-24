@@ -271,9 +271,15 @@ class CMDRequest(object):
     def __init__(self, **kwargs):
         super(CMDRequest, self).__init__()
         self._cache = PadovaCache()
-
         self._settings = self._update_settings(kwargs)
-        self._r = self._query(self._settings)
+        if self.__hash__() in self._cache:
+            # Get request from the cache
+            print("Reading from cache")
+            self._r = self._cache[self.__hash__()]
+        else:
+            # Call API and cache it
+            self._r = self._query(self._settings)
+            self._cache[self.__hash__()] = self._r
 
     def _update_settings(self, kwargs):
         settings = get_defaults()
@@ -350,13 +356,12 @@ class CMDRequest(object):
                 print('\n', '\n'.join(p.data).strip())
             raise RuntimeError('Server Response is incorrect')
 
-    def _hash_settings(self):
+    def __hash__(self):
         """Build a hash given the current settings."""
-        keys = self._settings.keys()
         # String to build hash against
-        obj = "".join([str(self._settings[k]) for k in keys])
+        q = urlencode(self._settings)
         m = hashlib.md5()
-        m.update(obj)
+        m.update(q)
         return m.hexdigest()
 
 
