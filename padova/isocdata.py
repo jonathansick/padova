@@ -5,8 +5,8 @@ This :mod:`isocdata` module helps to read Padova isochrone table files,
 and split them into individual isochrones.
 """
 
-import linecache
 import os
+from collections import OrderedDict
 
 import numpy as np
 from astropy.table import Table
@@ -25,83 +25,66 @@ class IsochroneTable(BaseReader):
     def __init__(self, f):
         super(IsochroneTable, self).__init__(f)
 
+    @property
+    def isochrones(self):
+        return self._isochrones
+
     def _read(self):
         """Read isochrone table and create Isochrone instances."""
+        self._isochrones = []
         self._header_lines, blocks, n_lines = self._prescan_table(2)
-        print self._header_lines
-        print n_lines
         for block in blocks:
-            print block
-        # self._isochrone_specs = self._read_isochrone_specs(start_indices)
-        # self.metadata = self._read_metadata(0, start_indices[0])
-        # self.isochrones = self._read_isochrones(start_indices)
-        # linecache.clearcache()
+            isoc = self._read_isochrone(block, n_lines)
+            self._isochrones.append(isoc)
 
-    def _read_isochrone_specs(self, start_indices):
-        """Produce a list of the age and metallicity specifications for
-        each isochone in the table.
-        """
-        specs = []
-        for i in start_indices:
-            line = linecache.getline(self.fname, i + 1).rstrip().split()
-            z = float(line[4])
-            age = float(line[7])
-            specs.append({"Z": z, "age": age})
-        return specs
-
-    def _read_isochrones(self, start_indices):
-        """Extract isochrones from the table, creating individual
-        :class:`Isochrone` instances.
-        """
-        isocs = []
-        for i, (start_index, meta) in enumerate(
-                zip(start_indices, self._isochrone_specs)):
-            if i < len(start_indices) - 1:
-                end_index = start_indices[i + 1]
-            else:
-                end_index = self._linecount()
-            isoc = self._read_isochrone(start_index, end_index, meta)
-            isocs.append(isoc)
-        return isocs
-
-    def _read_isochrone(self, start_index, end_index, meta):
+    def _read_isochrone(self, block, n_lines):
         """Read a single isochrone, between `start_index` and `end_index`."""
-        header = self._read_header(start_index)
+        colnames = self._parse_colnames(block['header_lines'][-1])
+        # skip first column because it's a blank tab
+        usecols = [i + 1 for i, c in enumerate(colnames)]
+        meta = self._parse_meta(block['header_lines'][0])
+        meta['header'] = self._header_lines
         dt = []
-        for cname in header:
+        for cname in colnames:
             if cname == 'stage':
                 dt.append((cname, 'S40'))
             elif cname == 'pmode':
                 dt.append((cname, np.int))
             else:
                 dt.append((cname, np.float))
-        ncols = len(dt)
-        data = np.empty(end_index - start_index - 2, dtype=np.dtype(dt))
-        for j, i in enumerate(xrange(start_index + 2, end_index)):
-            parts = linecache.getline(self.fname, i + 1).rstrip('\n').split()
-            if len(parts) == ncols - 1:
-                parts.append(' ')  # likely missing a 'stage' column here
-            for val, (cname, typ) in zip(parts, dt):
-                if typ == np.float:
-                    data[cname][j] = float(val)
-                elif typ == np.int:
-                    data[cname][j] = int(val)
-                else:
-                    data[cname][j] = val
-        tbl = Table(data,
-                meta={"header": self.metadata,
-                      "Z": meta['Z'],
-                      'age': meta['age']})
+        # ncols = len(dt)
+        data = np.empty(block['end'] - block['start'], dtype=np.dtype(dt))
+        self._f.seek(0)
+        data = np.genfromtxt(self._f,
+                             dtype=np.dtype(dt),
+                             delimiter='\t',
+                             skip_header=block['start'],
+                             skip_footer=n_lines - block['end'] - 1,
+                             autostrip=True,
+                             usecols=usecols)
+        tbl = Table(data, meta=meta)
         isoc = Isochrone(tbl)
         return isoc
+
+    def _parse_colnames(self, header):
+        header = header.replace('\t', ' ')
+        parts = header.split()
+        return parts
+
+    def _parse_meta(self, header):
+        header = header.replace('\t', ' ')
+        header = header.replace('=', ' ')
+        parts = header.split()[1:-1]
+        vals = [float(p) for p in parts[1::2]]
+        meta = OrderedDict(zip(parts[::2], vals))
+        return meta
 
 
 class Isochrone(object):
     """Holds a single isochrone (single age, and metallicity).
-    
+
     Parameters
     ----------
-
     table : :class:`astropy.table.Table` instance
         A table with isochrone data. This table must also have metadata
         with age and metallicity information. This table is typically
@@ -119,7 +102,7 @@ class Isochrone(object):
     @property
     def age(self):
         """Age of this isochrone (yr)."""
-        return self.table.meta['age']
+        return self.table.meta['Age']
 
     @property
     def z_code(self):
@@ -150,17 +133,18 @@ class Isochrone(object):
         """
         cnames = self.table.colnames
         non_mag_cnames = ['log(age/yr)', 'M_ini', 'M_act', 'logL/Lo', 'logTe',
-                'logG', 'mbol', 'C/O', 'M_hec', 'period', 'pmode', 'logMdot',
-                'int_IMF', 'stage']
+                          'logG', 'mbol', 'C/O', 'M_hec', 'period', 'pmode',
+                          'logMdot',
+                          'int_IMF', 'stage',
+                          'Z', 'logageyr', 'logLLo']
         # Normally I'd use sets, but column ordering is important
         return [name for name in cnames if name not in non_mag_cnames]
 
     def export_for_starfish(self, output_dir, bands=None):
         """Export the isochrone in a format useful for StarFISH `mklib`.
-        
+
         Parameters
         ----------
-
         output_dir : str
             Directory where the isochrone file will be saved. The full
             filename is generated by the method to conform to the standard
@@ -173,8 +157,10 @@ class Isochrone(object):
         """
         filename = "z%s_%s" % (self.z_code, self.age_code)
         output_path = os.path.join(output_dir, filename)
-        if not os.path.exists(output_dir): os.makedirs(output_dir)
-        if os.path.exists(output_path): os.remove(output_path)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        if os.path.exists(output_path):
+            os.remove(output_path)
         fmt = {'m_ini': "%10.7f"}  # table writer formatting
         if bands is None:
             bandnames = self.filter_names
@@ -183,9 +169,9 @@ class Isochrone(object):
         else:
             bandnames = [n for n in bands if n in self.filter_names]
         self.table.write(output_path,
-                format='ascii.fixed_width_no_header',
-                formats=fmt,
-                delimiter=' ',
-                delimiter_pad=None,
-                bookend=False,
-                include_names=['M_ini'] + bandnames)
+                         format='ascii.fixed_width_no_header',
+                         formats=fmt,
+                         delimiter=' ',
+                         delimiter_pad=None,
+                         bookend=False,
+                         include_names=['M_ini'] + bandnames)
