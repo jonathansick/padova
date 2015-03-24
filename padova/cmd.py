@@ -9,6 +9,12 @@ Code adapted from ezpadova - Morgan Fousneau, MIT License
 from __future__ import print_function, unicode_literals, division
 
 from padova.interface import CMDRequest
+from padova.isocdata import IsochroneTable
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 
 class IsochroneRequest(CMDRequest):
@@ -17,9 +23,11 @@ class IsochroneRequest(CMDRequest):
         super(IsochroneRequest, self).__init__(**kwargs)
 
     @property
-    def table(self, arg1):
+    def table(self):
         """Astropy table with the isochrone."""
-        pass
+        f = StringIO(self._r)
+        t = IsochroneTable(f)
+        return t
 
     @property
     def data(self):

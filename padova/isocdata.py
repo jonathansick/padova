@@ -11,37 +11,31 @@ import os
 import numpy as np
 from astropy.table import Table
 
-from .basereader import BaseReader
+from padova.basereader import BaseReader
 
 
 class IsochroneTable(BaseReader):
     """Reads an isochrone table (output from the Padova CMD interface).
-    
-    Attributes
-    ----------
-
-    metadata : list
-        List of lines from the metadata found at the top of the ischrone
-        table file.
-    isochrones : list
-        List of :class:`Isochrone` instances read from the table.
 
     Parameters
     ----------
-
-    fname : str
-        Filename of isochrone table to read.
+    fname :
+        File handle of dataset to read
     """
-    def __init__(self, fname):
-        super(IsochroneTable, self).__init__(fname)
+    def __init__(self, f):
+        super(IsochroneTable, self).__init__(f)
 
     def _read(self):
         """Read isochrone table and create Isochrone instances."""
-        start_indices = self._prescan_table()
-        self._isochrone_specs = self._read_isochrone_specs(start_indices)
-        self.metadata = self._read_metadata(0, start_indices[0])
-        self.isochrones = self._read_isochrones(start_indices)
-        linecache.clearcache()
+        self._header_lines, blocks, n_lines = self._prescan_table(2)
+        print self._header_lines
+        print n_lines
+        for block in blocks:
+            print block
+        # self._isochrone_specs = self._read_isochrone_specs(start_indices)
+        # self.metadata = self._read_metadata(0, start_indices[0])
+        # self.isochrones = self._read_isochrones(start_indices)
+        # linecache.clearcache()
 
     def _read_isochrone_specs(self, start_indices):
         """Produce a list of the age and metallicity specifications for
@@ -195,11 +189,3 @@ class Isochrone(object):
                 delimiter_pad=None,
                 bookend=False,
                 include_names=['M_ini'] + bandnames)
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
