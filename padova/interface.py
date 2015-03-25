@@ -16,16 +16,14 @@ if sys.version_info[0] > 2:
     from urllib.parse import urlencode
     from urllib import request
     from urllib.request import urlopen
-    # from io import StringIO
-    # from io import BytesIO
+    from io import StringIO
     from html import parser
 else:
     py3k = False
     from urllib import urlencode
     from urllib2 import urlopen
-    # from StringIO import StringIO
+    from StringIO import StringIO
     import HTMLParser as parser
-# from urlparse import urljoin
 
 import zlib
 import hashlib
@@ -33,6 +31,7 @@ import re
 
 from padova.resultcache import PadovaCache
 from padova.utils import compression_type
+from padova.isocdata import IsochroneTable
 
 
 # interpolation
@@ -363,6 +362,17 @@ class CMDRequest(object):
         m = hashlib.md5()
         m.update(q)
         return m.hexdigest()
+
+    @property
+    def tables(self):
+        """IsochroneTable table with the isochrones."""
+        f = StringIO(self._r)
+        t = IsochroneTable(f)
+        return t
+
+    @property
+    def data(self):
+        return self._r
 
 
 class CMDErrorParser(parser.HTMLParser):
