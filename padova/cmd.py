@@ -57,7 +57,7 @@ class AgeGridRequest(CMDRequest):
         kwargs['isoc_lage0'] = min_log_age
         kwargs['isoc_lage1'] = max_log_age
         kwargs['isoc_dlage'] = delta_log_age
-        kwargs['isoc_zeta'] = z
+        kwargs['isoc_zeta0'] = z
         super(AgeGridRequest, self).__init__(**kwargs)
 
 
