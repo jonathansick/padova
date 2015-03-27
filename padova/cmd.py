@@ -31,7 +31,7 @@ class IsochroneRequest(CMDRequest):
     def isochrone(self):
         """The :class:`padova.isocdata.Isochrone` instance, an Astropy Table.
         """
-        return self.tables.isochrones[0]
+        return self.isochrone_set.isochrones[0]
 
 
 class AgeGridRequest(CMDRequest):

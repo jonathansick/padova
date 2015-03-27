@@ -31,7 +31,7 @@ import re
 
 from padova.resultcache import PadovaCache
 from padova.utils import compression_type
-from padova.isocdata import IsochroneTable
+from padova.isocdata import IsochroneSet
 
 
 # interpolation
@@ -364,10 +364,10 @@ class CMDRequest(object):
         return m.hexdigest()
 
     @property
-    def tables(self):
-        """IsochroneTable table with the isochrones."""
+    def isochrone_set(self):
+        """IsochroneSet table with the isochrones."""
         f = StringIO(self._r)
-        t = IsochroneTable(f)
+        t = IsochroneSet(f)
         return t
 
     @property
