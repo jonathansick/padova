@@ -53,17 +53,11 @@ class IsochroneSet(BaseReader):
         """Read isochrone table and create Isochrone instances."""
         self._isochrones = []
         self._header_lines, blocks, n_lines = self._prescan_table(2)
-        for block in blocks:
-            isoc = self._read_isochrone(block, n_lines)
-            self._isochrones.append(isoc)
 
-    def _read_isochrone(self, block, n_lines):
-        """Read a single isochrone, between `start_index` and `end_index`."""
-        colnames = self._parse_colnames(block['header_lines'][-1])
+        # Load the entire dataset
+        colnames = self._parse_colnames(blocks[0]['header_lines'][-1])
         # skip first column because it's a blank tab
         usecols = [i + 1 for i, c in enumerate(colnames)]
-        meta = self._parse_meta(block['header_lines'][0])
-        meta['header'] = self._header_lines
         dt = []
         for cname in colnames:
             if cname == 'stage':
@@ -72,19 +66,33 @@ class IsochroneSet(BaseReader):
                 dt.append((cname, np.int))
             else:
                 dt.append((cname, np.float))
-        # ncols = len(dt)
-        data = np.empty(block['end'] - block['start'], dtype=np.dtype(dt))
         self._f.seek(0)
         data = np.genfromtxt(self._f,
                              dtype=np.dtype(dt),
                              delimiter='\t',
-                             skip_header=block['start'],
-                             skip_footer=n_lines - block['end'] - 1,
                              autostrip=True,
+                             comments='#',
                              usecols=usecols)
-        tbl = Isochrone(data, meta=meta)
-        isoc = Isochrone(tbl)
-        return isoc
+
+        # Find where age or metallicity changed
+        age_diffs = np.diff(data['logageyr'])
+        z_diffs = np.diff(data['Z'])
+        changed = np.where((age_diffs >= 0.0001) | (z_diffs >= 0.000001))[0]
+        changed += 1  # needed to get indexes right below
+        assert len(changed) + 1 == len(blocks)
+
+        # Do this so we can iterate all blocks uniformly
+        changed = np.concatenate([[0], changed, [len(data) + 1]])
+
+        # Build individual isochrone tables
+        for i, (idx0, block) in enumerate(zip(changed[:-1], blocks)):
+            idx1 = changed[i + 1]
+            isoc_data = data[idx0:idx1]
+            meta = self._parse_meta(block['header_lines'][0])
+            meta['header'] = self._header_lines
+            tbl = Isochrone(isoc_data, meta=meta)
+            isoc = Isochrone(tbl)
+            self._isochrones.append(isoc)
 
     def _parse_colnames(self, header):
         header = header.replace('\t', ' ')
