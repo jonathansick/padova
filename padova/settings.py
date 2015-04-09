@@ -126,12 +126,13 @@ ISOC_VAL = {
 }
 
 
+# NOTE these settings are specific to v2.3 of CMD
 def get_defaults():
     v = (('binary_frac', 0.3),
          ('binary_kind', 1),
          ('binary_mrinf', 0.7),
          ('binary_mrsup', 1),
-         ('cmd_version', 2.3),
+         ('cmd_version', 2.3),  # TODO update to keep track with web service?
          ('dust_source', 'nodust'),
          ('dust_sourceC', 'AMCSIC15'),
          ('dust_sourceM', 'dpmod60alox40'),
@@ -170,3 +171,65 @@ def get_defaults():
          ('photsys_version', 'yang'),
          ('submit_form', 'Submit'))
     return OrderedDict(v)
+
+
+def validate_settings(s):
+    """Provide rudimentary validation of a settings dictionary."""
+    _defaults = get_defaults()
+    # No more or fewer keys than are known
+    known_keys = set(_defaults.keys())
+    key_set = set(s.keys())
+    # print known_keys.symmetric_difference(key_set)
+    assert key_set == known_keys
+
+    assert in_range(s['binary_frac'], 0., 1.)
+    assert s['binary_kind'] == _defaults['binary_kind']
+    assert s['binary_mrinf'] == _defaults['binary_mrinf']
+    assert s['binary_mrsup'] == _defaults['binary_mrsup']
+    assert s['cmd_version'] == _defaults['cmd_version']
+    assert s['dust_source'] == _defaults['dust_source']
+    assert s['dust_sourceC'] in CIRCUM_CSTARS
+    assert s['dust_sourceM'] in CIRCUM_MSTARS
+    assert in_range(s['eta_reimers'], 0., 0.5)  # Could go higher
+    assert s['extinction_av'] >= 0.
+    assert s['icm_lim'] == _defaults['icm_lim']
+    assert s['imf_file'] == _defaults['imf_file']  # FIXME allow options
+    assert in_range(s['isoc_age'], 1e6, 14e9)  # FIXME unknown limits here
+    assert in_range(s['isoc_age0'], 1e6, 14e9)
+    assert s['isoc_dlage'] > 0.
+    assert s['isoc_dz'] > 0.
+    assert s['isoc_kind'] in [v[0] for k, v in MODELS.iteritems()]
+    assert in_range(s['isoc_lage0'], 6.6, 10.13)
+    assert in_range(s['isoc_lage1'], 6.6, 10.13)
+    assert s['isoc_val'] in ISOC_VAL
+    assert in_range(s['isoc_z0'], 0.0001, 0.03)
+    assert in_range(s['isoc_z1'], 0.0001, 0.03)
+    assert in_range(s['isoc_zeta'], 0.0001, 0.03)
+    assert in_range(s['isoc_zeta0'], 0.0001, 0.03)
+    assert s['kind_cspecmag'] in [v[0] for k, v in CARBON_STARS.iteritems()]
+    assert s['kind_dust'] == _defaults['kind_dust']
+    assert s['kind_interp'] in [v for k, v in INTERP.iteritems()]
+    assert s['kind_mag'] == _defaults['kind_mag']
+    assert s['kind_postagb'] == _defaults['kind_postagb']
+    assert s['kind_pulsecycle'] == _defaults['kind_pulsecycle']
+    assert s['lf_deltamag'] > 0.
+    assert in_range(s['lf_maginf'], -30, 30)
+    assert in_range(s['lf_magsup'], -30, 30)
+    assert s['mag_lim'] == _defaults['mag_lim']
+    assert s['mag_res'] == _defaults['mag_res']
+    assert s['output_evstage'] in [0, 1]
+    assert s['output_gzip'] == _defaults['output_gzip']  # TODO allow
+    assert s['output_kind'] in [0, 2]  # TODO allow LFs?
+    # assert s['photsys_version'] == _defaults['photsys_version']  # FIXME
+    # assert s['photsys_file'] in
+    assert s['submit_form'] == _defaults['submit_form']
+
+
+def in_range(value, min_val, max_val):
+    if value > max_val:
+        print value, "max", max_val
+        return False
+    if value < min_val:
+        print value, "min", min_val
+        return False
+    return True

@@ -33,7 +33,7 @@ from padova.utils import compression_type
 from padova.isocdata import IsochroneSet
 
 from padova.settings import INTERP, PHOT, MODELS, CARBON_STARS, \
-    CIRCUM_MSTARS, CIRCUM_CSTARS, ISOC_VAL, get_defaults
+    CIRCUM_MSTARS, CIRCUM_CSTARS, get_defaults, validate_settings
 
 
 class CMDRequest(object):
@@ -119,7 +119,6 @@ class CMDRequest(object):
 
     def _update_settings(self, kwargs):
         settings = get_defaults()
-        settings.update(kwargs)
 
         if 'model' in kwargs:
             v = kwargs.pop('model')
@@ -158,6 +157,8 @@ class CMDRequest(object):
         for k, v in kwargs.items():
             if k in settings:
                 settings[k] = v
+
+        validate_settings(settings)
 
         return settings
 
