@@ -1,0 +1,521 @@
+[cmd_version]
+kind = "static"
+default = "2.6"
+
+[submit_form]
+kind = "static"
+default = "Submit"
+
+[isoc_kind]
+slug = "Isochrone set"
+kind = "choices"
+default = "parsec_CAF09_v1.2S"
+[isoc_kind.choices."parsec_CAF09_v1.2S"]
+slug = "PARSEC version 1.2S"
+note = """
+Available for 0.0001≤Z≤0.06 (-2.2≤[M/H]≤+0.5).
+
+Mass ranges are:
+
+- 0.0001≤Z≤0.02: 0.1≤M/M☉<350;
+- 0.03≤Z≤0.04: 0.1≤M/M☉<150; and
+- Z=0.06: 0.1≤M/M☉<20.
+
+Cf. [Tang et al (2014)](http://adsabs.harvard.edu/abs/2014MNRAS.445.4287T) for 0.001≤Z≤0.004, \
+and [Chen et al., in preparation](http://adsabs.harvard.edu/abs/) for other Z. \
+With revised and calibrated surface boundary conditions in low-mass dwarfs \
+([Chen et al. (2014)](http://adsabs.harvard.edu/abs/2014MNRAS.444.2525C)),
+and a slightly improved resolution.
+"""
+[isoc_kind.choices."parsec_CAF09_v1.1"]
+slug = "PARSEC version 1.1"
+note = """
+Available for 0.0001≤Z≤0.06 (-2.2≤[M/H]≤+0.5), in the range 0.1≤M/M☉<;12.
+
+With revised diffusion+overshooting in low-mass stars, \
+and improvements in interpolation scheme.
+"""
+[isoc_kind.choices."parsec_CAF09_v1.0"]
+slug = "PARSEC version 1.0"
+note = """
+Available for 0.0005≤Z≤0.07 (-1.5≤[M/H]≤+0.6), in the range 0.1≤M/M☉<12.
+"""
+[isoc_kind.choices.gi10a]
+slug = """
+[Marigo et al (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) \
+& [Girardi et al (2010)](http://adsabs.harvard.edu/abs/2010ApJ...724.1030G) \
+Case A low-mass, low-Z AGB
+"""
+[isoc_kind.choices.gi10b]
+slug = """
+[Marigo et al (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) \
+& [Girardi et al (2010)](http://adsabs.harvard.edu/abs/2010ApJ...724.1030G) \
+Case B low-mass, low-Z AGB
+"""
+[isoc_kind.choices.ma08]
+slug = """
+[Marigo et al. (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M):
+
+- [Girardi et al. (2000)](http://adsabs.harvard.edu/abs/2000A%26AS..141..371G) \
+up to early-AGB + detailed TP-AGB from \
+[Marigo &amp; Girardi (2007)](http://adsabs.harvard.edu/abs/2007A%26A...469..239M) \
+(for M≤7M☉) + \
+[Bertelli et al. (1994)](http://adsabs.harvard.edu/abs/1994A%26AS..106..275B) \
+(for M>7M☉) + additional Z=0.0001 and Z=0.001 tracks.
+"""
+[isoc_kind.choices.gi2000]
+slug = """
+Basic set of [Girardi et al. (2002)](http://adsabs.harvard.edu/abs/2002A%26A...391..195G): \
+[Girardi et al. (2000)](http://adsabs.harvard.edu/abs/2000A%26AS..141..371G) \
++ simplified TP-AGB (for M≤7M☉) + \
+[Bertelli et al. (1994)](http://adsabs.harvard.edu/abs/1994A%26AS..106..275B)
+(for M>7M☉) + additional Z=0.0001 and Z=0.001 tracks.
+"""
+
+[eta_reimers]
+slug = "Mass-loss on RGB using the Reimers formula with η_Reimer"
+note = """
+Only applies to the PARSEC isochrone sets. \
+Warning: mass loss works fine as long as η_Reimers<0.5. \
+Check the results for higher values.
+"""
+kind = "range"
+type = "float"
+range = [0.0, 0.5]
+default = 0.2
+format = '{eta_reimers:0.2f}'
+
+[kind_interp]
+kind = "static"
+default = "1"
+
+[kind_tpagb]
+kind = "static"
+default = "0"
+
+[kind_pulsecycle]
+kind = "static"
+default = "0"
+
+[kind_postagb]
+kind = "static"
+default = "-1"
+
+[photsys_version]
+kind = "choices"
+default = "yang"
+[photsys_version.choices.yang]
+slug = """
+NBC as described in \
+[Chen et al. (2014)](http://adsabs.harvard.edu/abs/2014MNRAS.444.2525C), \
+based on PHOENIX BT-Settl for Teff<4000 K, and on ATLAS9 ODFNEW otherwise
+"""
+[photsys_version.choices.odfnew]
+slug = """
+OBC as described in \
+[Girardi et al. (2008)](http://adsabs.harvard.edu/abs/2008PASP..120..583G) \
+mostly based on ATLAS9 ODFNEW models.
+"""
+note = """
+See also
+[Marigo et al. (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) and \
+[Girardi et al. (2002)](http://adsabs.harvard.edu/abs/2002A%26A...391..195G).
+"""
+
+# TODO incorporate data from http://stev.oapd.inaf.it/~lgirardi/cmd_2.7/photsys.html
+[photsys_file]
+alias = "photsys"
+kind = "choices"
+default = "ubvrijhk"
+format = 'tab_mag_odfnew/tab_mag_{photsys_file}.dat'
+[photsys_file.choices."2mass_spitzer"]
+slug = "2MASS + Spitzer (IRAC+MIPS)"
+[photsys_file.choices."2mass_spitzer_wise"]
+slug = "2MASS + Spitzer (IRAC+MIPS) + WISE"
+[photsys_file.choices."2mass"]
+slug = "2MASS JHKs"
+[photsys_file.choices."ogle_2mass_spitzer"]
+slug = "OGLE + 2MASS + Spitzer (IRAC+MIPS)"
+[photsys_file.choices."2mass_spitzer_wise_washington_ddo51"]
+slug = "2MASS+Spitzer+WISE+Washington+DDO51"
+[photsys_file.choices."ubvrijhk"]
+slug = "UBVRIJHK (cf. Maiz-Apellaniz 2006 + Bessell 1990)"
+[photsys_file.choices."bessell"]
+slug = "UBVRIJHKLMN (cf. Bessell 1990 + Bessell &amp; Brett 1988)"
+[photsys_file.choices."akari"]
+slug = "AKARI"
+[photsys_file.choices."BATC"]
+slug = "batc"
+[photsys_file.choices."megacam_wircam"]
+slug = "CFHT MegaCam + WIRCam (all ABmags)"
+[photsys_file.choices."wircam"]
+slug = "CFHT WIRCam"
+[photsys_file.choices."megacam"]
+slug = "CFHT MegaCam u*g'r'i'z'"
+[photsys_file.choices."ciber"]
+slug = "CIBER"
+[photsys_file.choices."dcmc"]
+slug = "DCMC"
+[photsys_file.choices."decam"]
+slug = "DECAM (ABmags)"
+[photsys_file.choices."decam_vista"]
+slug = "DECAM ugrizY (ABmags) + VISTA ZYJHKs (Vegamags)"
+[photsys_file.choices."DENIS"]
+slug = "denis"
+[photsys_file.choices."dmc14"]
+slug = "DMC 14 filters"
+[photsys_file.choices."dmc15"]
+slug = "DMC 15 filters"
+[photsys_file.choices."eis"]
+slug = "ESO/EIS (WFI UBVRIZ + SOFI JHK)"
+[photsys_file.choices."wfi"]
+slug = "ESO/WFI"
+[photsys_file.choices."wfi_sofi"]
+slug = "ESO/WFI+SOFI"
+[photsys_file.choices."wfi2"]
+slug = "ESO/WFI2"
+[photsys_file.choices."galex"]
+slug = "GALEX FUV+NUV (Vegamag) + Johnson's UBV"
+[photsys_file.choices."galex_sloan"]
+slug = "GALEX FUV+NUV + SDSS ugriz (all ABmags)"
+[photsys_file.choices."gaia"]
+slug = "Gaia's G, G_BP and G_RP (Vegamags)"
+[photsys_file.choices."UVbright"]
+slug = "HST+GALEX+Swift/UVOT UV filters"
+[photsys_file.choices."acs_hrc"]
+slug = "HST/ACS HRC"
+[photsys_file.choices."acs_wfc"]
+slug = "HST/ACS WFC"
+[photsys_file.choices."nicmosab"]
+slug = "HST/NICMOS AB"
+[photsys_file.choices."nicmosst"]
+slug = "HST/NICMOS ST"
+[photsys_file.choices."nicmosvega"]
+slug = "HST/NICMOS vega"
+[photsys_file.choices."stis"]
+slug = "HST/STIS imaging mode"
+[photsys_file.choices."wfc3ir"]
+slug = "HST/WFC3 IR channel (final throughputs)"
+[photsys_file.choices."wfc3uvis1"]
+slug = "HST/WFC3 UVIS channel, chip 1 (final throughputs)"
+[photsys_file.choices."wfc3uvis2"]
+slug = "HST/WFC3 UVIS channel, chip 2 (final throughputs)"
+[photsys_file.choices."wfc3_verywide"]
+slug = "HST/WFC3 long-pass and extremely wide filters (UVIS1, final throughputs)"
+[photsys_file.choices."wfc3_medium"]
+slug = "HST/WFC3 medium filters (UVIS1+IR, final throughputs)"
+[photsys_file.choices."wfc3_wide"]
+slug = "HST/WFC3 wide filters (UVIS1+IR, final throughputs)"
+[photsys_file.choices."wfpc2"]
+slug = "HST/WFPC2 (Vegamag, cf. Holtzman et al. 1995)"
+[photsys_file.choices."int_wfc"]
+slug = "INT/WFC (Vegamag)"
+[photsys_file.choices."iphas"]
+slug = "IPHAS"
+[photsys_file.choices."kepler"]
+slug = "Kepler + SDSS griz + DDO51 (in ABmags)"
+[photsys_file.choices."kepler_2mass"]
+slug = "Kepler + SDSS griz + DDO51 (in ABmags) + 2MASS (~Vegamag)"
+[photsys_file.choices."lbt_lbc"]
+slug = "LBT/LBC (Vegamag)"
+[photsys_file.choices."noao_ctio_mosaic2"]
+slug = "NOAO/CTIO/MOSAIC2 (Vegamag)"
+[photsys_file.choices."ogle"]
+slug = "OGLE-II"
+[photsys_file.choices."panstarrs1"]
+slug = "Pan-STARRS1"
+[photsys_file.choices."sloan"]
+slug = "SDSS ugriz"
+[photsys_file.choices."sloan_2mass"]
+slug = "SDSS ugriz + 2MASS JHKs"
+[photsys_file.choices."sloan_ukidss"]
+slug = "SDSS ugriz + UKIDSS ZYJHK"
+[photsys_file.choices."swift_uvot"]
+slug = "SWIFT/UVOT UVW2, UVM2, UVW1,u (Vegamag)"
+[photsys_file.choices."spitzer"]
+slug = "Spitzer IRAC+MIPS"
+[photsys_file.choices."stroemgren"]
+slug = "Stroemgren-Crawford"
+[photsys_file.choices."suprimecam"]
+slug = "Subaru/Suprime-Cam (ABmags)"
+[photsys_file.choices."TESS_2mass_kepler"]
+slug = "TESS + 2MASS (Vegamags) + Kepler + SDSS griz + DDO51 (in ABmags)"
+[photsys_file.choices."tycho2"]
+slug = "Tycho VTBT"
+[photsys_file.choices."ukidss"]
+slug = "UKIDSS ZYJHK (Vegamag)"
+[photsys_file.choices."visir"]
+slug = "VISIR"
+[photsys_file.choices."vista"]
+slug = "VISTA ZYJHKs (Vegamag)"
+[photsys_file.choices."vst_omegacam"]
+slug = "VST/OMEGACAM (Vegamag)"
+[photsys_file.choices."vilnius"]
+slug = "Vilnius"
+[photsys_file.choices."washington"]
+slug = "Washington CMT1T2"
+[photsys_file.choices."washington_ddo51"]
+slug = "Washington CMT1T2 + DDO51"
+[photsys_file.choices."jwst_wide"]
+slug = "planned JWST wide filters"
+
+[kind_cspecmag]
+alias = "cspecmag"
+slug = "Carbon star bolometric corrections"
+kind = "choices"
+default = "aringer09"
+[kind_cspecmag.choices.loidl01]
+slug = "[Loidl et al. (2001)](http://adsabs.harvard.edu/abs/2001A%26A...371.1065L)"
+note = """
+As in \
+[Marigo et al. (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) and \
+[Girardi et al. (2008)](http://adsabs.harvard.edu/abs/2008PASP..120..583G).
+"""
+[kind_cspecmag.choices.aringer09]
+slug = "[Aringer et al. (2009)](http://adsabs.harvard.edu/abs/2009A%26A...503..913A)"
+
+[dust_sourceM]
+alias = "dust_m"
+slug = "Dust around M stars"
+note = """
+This will only affect stars with significant mass loss, especially the \
+red supergiants, TP-AGB, and upper-RGBs, and only in the case of
+[Marigo et al. (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) \
+and later tracks. The following choices refer to the RT calculations, which \
+are applied using the scaling relations described in the paper.
+"""
+kind = "choices"
+default = "sil"
+[dust_sourceM.choices.nodustM]
+slug = "No dust"
+[dust_sourceM.choices.sil]
+slug = "Silicates"
+note = "As in [Bressan et al. (1998)](http://adsabs.harvard.edu/abs/1998A%26A...332..135B)"
+[dust_sourceM.choices.AlOx]
+slug = "100% AlOx"
+note = "As in [Groenewegen (2006)](http://adsabs.harvard.edu/abs/2006A%26A...448..181G)"
+[dust_sourceM.choices.dpmod60alox40]
+slug = "60% Silicate + 40% AlOx"
+note = "As in [Groenewegen (2006)](http://adsabs.harvard.edu/abs/2006A%26A...448..181G)"
+[dust_sourceM.choices.dpmod]
+slug = "100% Silicate"
+note = "As in [Groenewegen (2006)](http://adsabs.harvard.edu/abs/2006A%26A...448..181G)"
+
+[dust_sourceC]
+alias = "dust_c"
+slug = "Dust around C stars"
+note = """
+This will only affect stars with significant mass loss, especially the \
+red supergiants, TP-AGB, and upper-RGBs, and only in the case of
+[Marigo et al. (2008)](http://adsabs.harvard.edu/abs/2008A%26A...482..883M) \
+and later tracks. The following choices refer to the RT calculations, which \
+are applied using the scaling relations described in the paper.
+"""
+kind = "choices"
+default = "nodustC"
+[dust_sourceC.choices.nodustC]
+slug = "No dust"
+[dust_sourceC.choices.gra]
+slug = "Graphites"
+note = "As in [Bressan et al. (1998)](http://adsabs.harvard.edu/abs/1998A%26A...332..135B)"
+[dust_sourceC.choices.AMC]
+slug = "100% AMC"
+note = "As in [Groenewegen (2006)](http://adsabs.harvard.edu/abs/2006A%26A...448..181G)"
+[dust_sourceC.choices.AMCSIC15]
+slug = "85% AMC + 15% SiC"
+note = "As in [Groenewegen (2006)](http://adsabs.harvard.edu/abs/2006A%26A...448..181G)"
+
+[kind_mag]
+kind = "static"
+default = "2"
+
+[kind_dust]
+default = "0"
+kind = "static"
+
+[extinction_av]
+alias = "av"
+slug = "Total extinction A_V (mag)"
+note = """
+If AV>0, extinction coefficients will be applied on a star-to-star basis. \
+See [Girardi et al. (2008)](http://adsabs.harvard.edu/abs/2008PASP..120..583G) \
+for details.
+
+Extinction curve: [Cardelli et al. (1989)](http://adsabs.harvard.edu/abs/1989ApJ...345..245C) \
++ [O'Donnell (1994)](http://adsabs.harvard.edu/abs/1994ApJ...422..158O) \
+with RV=3.1.
+
+Warning: For the moment, interstellar extinction works only for \
+isochrone tables, not for LFs or SSP integrated magnitudes.
+"""
+kind = "range"
+type = "float"
+default = 0.0
+range = [0.0, 100.0]
+format = '{extinction_av:.6f}'
+
+[imf_file]
+alias = "imf"
+slug = "Initial mass function"
+note = """
+The IMF will be used to compute the stellar occupation along the isochrones, \
+when computing integrated magnitudes, LFs, etc.
+"""
+kind = "choices"
+default = "chabrier_lognormal"
+format = 'tab_imf/imf_{imf_file}.dat'
+[imf_file.choices."salpeter"]
+slug = "Salpeter (1955) with cutoff at 0.01 M☉"
+[imf_file.choices."chabrier_exponential"]
+slug = "Chabrier (2001) exponential"
+[imf_file.choices."chabrier_lognormal"]
+slug = "Chabrier (2001) lognormal"
+[imf_file.choices."chabrier_lognormal_salpeter"]
+slug = "Chabrier (2001) lognormal + Salpeter (1955) for M>1M☉"
+[imf_file.choices."kroupa_orig"]
+slug = "Kroupa (2001, 2002) canonical two-part-power law IMF, corrected for unresolved binaries"
+
+[isoc_val]
+alias = 'grid'
+slug = "Compute single isochrone, or grid of age/metallicity"
+kind = "choices"
+default = "0"
+[isoc_val.choices."0"]
+slug = "Single isochrone"
+[isoc_val.choices."1"]
+slug = "Sequence of isochrones at constant metallicity"
+[isoc_val.choices."2"]
+slug = "Sequence of isochrones at constant age"
+
+[isoc_age]
+alias = "age"
+slug = "Single isochrone age (years)"
+default = 1.0e9
+kind = "range"
+type = "float"
+range = [1e6, 14e9]  # FIXME
+
+[isoc_zeta]
+alias = "z"
+slug = "Single isochrone metallicity"
+default = 0.019
+kind = "range"
+type = "float"
+range = [0.0001, 0.04]
+
+[isoc_zeta0]
+alias = 'grid_z'
+slug = "Fixed metallicity for grid=1"
+default = 0.008
+kind = "range"
+type = "float"
+range = [0.0001, 0.04]
+
+[isoc_lage0]
+alias = 'grid_log_age0'
+slug = "Starting log age when grid=1"
+default = 6.6
+kind = "range"
+type = "float"
+range = [6.6, 10.13]
+
+[isoc_lage1]
+alias = 'grid_log_age1'
+slug = "Ending log age when grid=1"
+default = 10.13
+kind = "range"
+type = "float"
+range = [6.6, 10.13]
+
+[isoc_dlage]
+alias = 'grid_delta_log_age'
+slug = "Δlog(yr) age when grid=1"
+default = 0.05
+kind = "range"
+type = "float"
+range = [0.0001, 10.0]  # FIXME
+
+[isoc_age0]
+alias = "grid_age"
+slug = "Fixed age for grid=2"
+default = 12.7e9
+kind = "range"
+type = "float"
+range = [1e6, 14e9]  # FIXME
+
+[isoc_z0]
+alias = "grid_z0"
+slug = "Starting z when grid=2"
+default = 0.0001
+kind = "range"
+type = "float"
+range = [0.0001, 0.04]
+
+[isoc_z1]
+alias = "grid_z1"
+slug = "Ending z when grid=2"
+default = 0.03
+kind = "range"
+type = "float"
+range = [0.0001, 0.04]
+
+[isoc_dz]
+alias = "grid_delta_z"
+default = 0.0001
+kind = "range"
+type = "float"
+range = [0.000001, 1.0]  # FIXME
+
+[output_kind]
+slug = "Kind of output"
+default = "0"
+kind = "choices"
+[output_kind.choices."0"]
+slug = "Isochrone tables"
+[output_kind.choices."1"]
+slug = "Luminosity functions"
+[output_kind.choices."4"]
+slug = "SSP integrated magnitudes"
+
+[lf_maginf]
+alias = "lf_mag0"
+slug = "LF faintest mag"
+default = 20
+kind = "range"
+type = "float"
+range = [-40.0, 40.0]
+
+[lf_magsup]
+alias = "lf_mag1"
+slug = "LF brightest mag"
+default = -20
+kind = "range"
+type = "float"
+range = [-40.0, 40.0]
+
+[lf_deltamag]
+alias = "lf_delta_mag"
+slug = "LF Δmag"
+default = 0.2
+kind = "range"
+type = "float"
+range = [0.01, 10.0]
+
+[output_evstage]
+alias = "tag_evstage"
+default = "1"
+kind = "choices"
+[output_evstage.choices."0"]
+slug = "Don't tag evolutionary stages"
+[output_evstage.choices."1"]
+slug = "Tag evolutionary stages"
+
+[output_gzip]
+alias = "gzip"
+default = "1"
+kind = "choices"
+[output_gzip.choices."0"]
+slug = "Don't gzip the output"
+[output_gzip.choices."1"]
+slug = "gzip the output"
+
