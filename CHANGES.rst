@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.1.1 (unreleased)
+0.1.1 (2015-04-15)
 ------------------
 
 - Cleanup README-based documentation

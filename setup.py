@@ -29,7 +29,7 @@ setup(
     name=PACKAGENAME,
     # Versions should comply with PEP440.
     # (http://www.python.org/dev/peps/pep-0440)
-    version='0.1.1.dev0',
+    version='0.1.1',
     description=DESCRIPTION,
     long_description=long_description,
     url=URL,
