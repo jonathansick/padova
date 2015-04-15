@@ -43,15 +43,15 @@ class CMDRequest(object):
     def __init__(self, settings):
         super(CMDRequest, self).__init__()
         self._cache = PadovaCache()
-        self._settings = settings
-        if self._settings in self._cache:
+        self.settings = settings
+        if self.settings in self._cache:
             # Get request from the cache
             # print("Reading from cache")
-            self._r = self._cache[self._settings]
+            self._r = self._cache[self.settings]
         else:
             # Call API and cache it
             self._r = self._request()
-            self._cache[self._settings] = self._r
+            self._cache[self.settings] = self._r
         self._isochrone_set = None
 
     def _request(self):
@@ -60,7 +60,7 @@ class CMDRequest(object):
         # FIXME convert to log
         # print('Requesting from {0}...'.format(webserver))
         url = webserver + '/cgi-bin/cmd'
-        q = urlencode(self._settings)
+        q = urlencode(self.settings.settings)
         if py3k:
             req = request.Request(url, q.encode('utf8'))
             c = urlopen(req).read().decode('utf8')
