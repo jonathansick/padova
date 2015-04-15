@@ -5,7 +5,7 @@ Padova
 Padova is a small python package for working with the so-called `Padova evolutionary tracks <http://stev.oapd.inaf.it/cgi-bin/cmd>`_ produced by Girardi and collaborators.
 Padova is compatible with the `Astropy`_ project.
 
-**Take a look at this `Jupyter notebook <http://nbviewer.ipython.org/github/jonathansick/padova/blob/master/notebooks/demo.ipynb>`_ to see what Padova can do.**
+Take a look at this `Jupyter notebook <http://nbviewer.ipython.org/github/jonathansick/padova/blob/master/notebooks/demo.ipynb>`_ to see what Padova can do.
 
 Of course, please use this project *responsibly*.
 Don't abuse the CMD servers.
