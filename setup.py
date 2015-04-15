@@ -33,8 +33,8 @@ setup(
     description=DESCRIPTION,
     long_description=long_description,
     url=URL,
-    author='AUTHOR',
-    author_email='AUTHOR_EMAIL',
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
