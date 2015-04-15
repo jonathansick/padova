@@ -33,13 +33,13 @@ Dependencies
 Tests
 -----
 
-Padova uses py.test to run tests:
+Padova uses py.test and tox to run tests. Setup with:
 
-    pip py.test
+    pip install tox
 
 Then to run the test suite:
 
-    py.test
+    tox
 
 
 Credits
