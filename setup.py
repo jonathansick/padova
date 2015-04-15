@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# VERSION should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
-VERSION = '0.1.dev'
-
-# Indicates if this version is a release version
-RELEASE = 'dev' not in VERSION
-
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 # To use a consistent encoding
@@ -32,11 +26,10 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name=PACKAGENAME,
-
-    # Versions should comply with PEP440.  For a discussion on single-sourcing
-    # the version across setup.py and the project code, see
-    # https://packaging.python.org/en/latest/single_source_version.html
-    version=VERSION,
+    # VERSION should be PEP386 compatible
+    # (http://www.python.org/dev/peps/pep-0386)
+    # Versions should comply with PEP440.
+    version='0.1.dev',
     description=DESCRIPTION,
     long_description=long_description,
     url=URL,
