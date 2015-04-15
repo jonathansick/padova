@@ -29,7 +29,7 @@ setup(
     # VERSION should be PEP386 compatible
     # (http://www.python.org/dev/peps/pep-0386)
     # Versions should comply with PEP440.
-    version='0.1.dev',
+    version='0.1',
     description=DESCRIPTION,
     long_description=long_description,
     url=URL,
