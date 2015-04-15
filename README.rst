@@ -2,6 +2,15 @@
 Padova
 ======
 
+.. image:: https://badge.fury.io/py/padova.png
+    :target: http://badge.fury.io/py/padova
+
+.. image:: https://travis-ci.org/jonathansick/padova.svg?branch=master
+    :target: https://travis-ci.org/jonathansick/padova
+
+.. image:: https://pypip.in/d/padova/badge.png
+    :target: https://pypi.python.org/pypi/padova
+
 Padova is a small python package for working with the so-called `Padova evolutionary tracks <http://stev.oapd.inaf.it/cgi-bin/cmd>`_ produced by Girardi and collaborators.
 Padova is compatible with the `Astropy`_ project.
 
