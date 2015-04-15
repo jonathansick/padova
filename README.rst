@@ -33,11 +33,13 @@ Dependencies
 Tests
 -----
 
-You can run tests via:
+Padova uses py.test to run tests:
 
-    python setup.py test
+    pip py.test
 
-The tests are located in ``padova/tests/``.
+Then to run the test suite:
+
+    py.test
 
 
 Credits

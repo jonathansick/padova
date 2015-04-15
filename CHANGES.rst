@@ -5,7 +5,7 @@ Changelog
 0.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- testing with py.test
 
 
 0.1.1 (2015-04-15)

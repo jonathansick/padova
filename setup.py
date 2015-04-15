@@ -44,7 +44,13 @@ setup(
     ],
     keywords='astronomy stellarpopulations',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['requests', 'numpy', 'astropy', 'pytoml'],
+    install_requires=['requests',
+                      'numpy',
+                      'astropy',
+                      'pytoml'],
+    tests_require=['pytest',
+                   'pytest-pep8',
+                   'pytest-cov'],
 
     package_data={
         'padova': ['padova/data/settings/*.toml'],
