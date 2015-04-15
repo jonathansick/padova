@@ -53,7 +53,7 @@ setup(
                    'pytest-cov'],
 
     package_data={
-        'padova': ['padova/data/settings/*.toml'],
+        'padova': ['data/settings/cmd_2_6.toml'],
     },
 
     # To provide executable scripts, use entry points in preference to the

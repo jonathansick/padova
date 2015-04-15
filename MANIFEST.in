@@ -1,7 +1,11 @@
 include README.rst
+include CHANGES.rst
+include LICENSE.rst
+include setup.cfg
+include tox.ini
+include padova/data/settings/cmd_2_6.toml
 
 recursive-include padova *.pyx *.c
-recursive-include padova *.toml
 
 recursive-include docs *
 recursive-include licenses *
