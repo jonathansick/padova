@@ -27,6 +27,13 @@ Features
 - Validation of settings before requesting data from the CMD servers.
 - Caching of requests so you don't hit the CMD servers when you ask for an isochrone set you already have.
 - Isochrones are provided as `Astropy`_ tables with metadata.
+- Isochrones can be exported for use with `StarFISH`_.
+
+
+Installation
+------------
+
+    pip install padova
 
 
 Dependencies
@@ -54,8 +61,8 @@ Then to run the test suite:
 Credits
 -------
 
-- Padova provides data from the CMD web site, which is a produce of Leo Girardi and collaborators.
-- Padova takes inspiration from `ezpadova`_ by Morgan Fouesneau.
+- Padova provides data from the `CMD web site <http://stev.oapd.inaf.it/cgi-bin/cmd>`_, which is a product of Leo Girardi and collaborators.
+- Padova takes inspiration and incorporates code from `ezpadova`_ by Morgan Fouesneau.
 
 
 Info
@@ -69,3 +76,4 @@ Padova is MIT licensed.
 
 .. _Astropy: http://www.astropy.org/
 .. _ezpadova: https://github.com/mfouesneau/ezpadova
+.. _StarFISH: http://www.noao.edu/staff/jharris/SFH/

@@ -7,6 +7,7 @@ Changelog
 
 - Testing with py.test and tox
 - Fixed installation of TOML settings schema with setuptools
+- Started testing on travis-ci
 
 
 0.1.1 (2015-04-15)
