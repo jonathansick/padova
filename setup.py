@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
-from os import path
+import os
+import codecs
 
-# Set affiliated package-specific settings
+
 PACKAGENAME = 'padova'
 DESCRIPTION = 'Helpers for using Padova isochrones.'
 LONG_DESCRIPTION = ''
@@ -16,20 +14,22 @@ AUTHOR_EMAIL = 'jonathansick@mac.com'
 LICENSE = 'MIT'
 URL = 'http://github.com/jonathansick/padova'
 
-here = path.abspath(path.dirname(__file__))
 
+def read(filename):
+    full_filename = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        filename)
+    return unicode(codecs.open(full_filename, encoding='utf-8').read())
 
-# Get the long description from the relevant file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+long_description = '\n\n'.join([read('README.rst'),
+                                read('CHANGES.rst')])
 
 
 setup(
     name=PACKAGENAME,
-    # VERSION should be PEP386 compatible
-    # (http://www.python.org/dev/peps/pep-0386)
     # Versions should comply with PEP440.
-    version='0.2.dev0',
+    # (http://www.python.org/dev/peps/pep-0440)
+    version='0.1.1.dev0',
     description=DESCRIPTION,
     long_description=long_description,
     url=URL,
