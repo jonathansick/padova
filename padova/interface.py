@@ -52,6 +52,7 @@ class CMDRequest(object):
             # Call API and cache it
             self._r = self._request()
             self._cache[self._settings] = self._r
+        self._isochrone_set = None
 
     def _request(self):
         """Request isochromes from CMD."""
@@ -59,12 +60,13 @@ class CMDRequest(object):
         # FIXME convert to log
         # print('Requesting from {0}...'.format(webserver))
         url = webserver + '/cgi-bin/cmd'
-        q = urlencode(self.settings)
+        q = urlencode(self._settings)
         if py3k:
             req = request.Request(url, q.encode('utf8'))
             c = urlopen(req).read().decode('utf8')
         else:
             c = urlopen(url, q).read()
+        # Find the output dataset URL in the HTML that CMD returns
         aa = re.compile('output\d+')
         fname = aa.findall(c)
         if len(fname) > 0:
@@ -73,6 +75,7 @@ class CMDRequest(object):
             # print('Downloading data...{0}'.format(url))
             bf = urlopen(url)
             r = bf.read()
+            # Decompress the data if necessary
             typ = compression_type(r, stream=True)
             if typ is not None:
                 r = zlib.decompress(bytes(r), 15 + 32)
@@ -89,10 +92,10 @@ class CMDRequest(object):
     @property
     def isochrone_set(self):
         """IsochroneSet table with the isochrones."""
-        # FIXME cache the isochrone set
-        f = StringIO(self._r)
-        t = IsochroneSet(f)
-        return t
+        if self._isochrone_set is None:
+            f = StringIO(self._r)
+            self._isochrone_set = IsochroneSet(f)
+        return self._isochrone_set
 
     @property
     def data(self):
