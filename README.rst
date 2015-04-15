@@ -2,11 +2,14 @@
 Padova
 ======
 
-.. image:: https://badge.fury.io/py/padova.png
-    :target: http://badge.fury.io/py/padova
+.. image:: https://zenodo.org/badge/10943/jonathansick/padova.svg
+    :target: http://dx.doi.org/10.5281/zenodo.16869
 
 .. image:: https://travis-ci.org/jonathansick/padova.svg?branch=master
     :target: https://travis-ci.org/jonathansick/padova
+
+.. image:: https://badge.fury.io/py/padova.png
+    :target: http://badge.fury.io/py/padova
 
 .. image:: https://pypip.in/d/padova/badge.png
     :target: https://pypi.python.org/pypi/padova

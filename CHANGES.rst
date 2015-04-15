@@ -5,7 +5,7 @@ Changelog
 0.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- DOI badge courtesy of Zenodo
 
 
 0.1.2 (2015-04-15)
