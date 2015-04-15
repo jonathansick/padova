@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # VERSION should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
-VERSION = '0.0.dev'
+VERSION = '0.1.dev'
 
 # Indicates if this version is a release version
 RELEASE = 'dev' not in VERSION
@@ -50,14 +50,11 @@ setup(
     ],
     keywords='astronomy stellarpopulations',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['requests', 'numpy', 'astropy'],
+    install_requires=['requests', 'numpy', 'astropy', 'pytoml'],
 
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.  If using Python 2.6 or less, then these
-    # have to be included in MANIFEST.in as well.
-    # package_data={
-    #     'sample': ['package_data.dat'],
-    # },
+    package_data={
+        'padova': ['padova/data/settings/*.toml'],
+    },
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

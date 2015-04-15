@@ -1,7 +1,7 @@
 include README.rst
 
-include distribute_setup.py
 recursive-include padova *.pyx *.c
+recursive-include padova *.toml
 
 recursive-include docs *
 recursive-include licenses *
