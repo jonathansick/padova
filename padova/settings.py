@@ -1,235 +1,185 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-CMD Settings reference.
+CMD Settings.
 
-This module contains settings options, defaults and validation functions.
+This module assists with documenting, validating and storing settings for
+the CMD web api.
 """
+
+import sys
+import os
 from collections import OrderedDict
+import hashlib
+
+if sys.version_info[0] > 2:
+    from urllib.parse import urlencode
+else:
+    from urllib import urlencode
+
+from pkg_resources import resource_stream
+import pytoml as toml
 
 
-INTERP = {'default': 0,
-          'improved': 1}
+class Settings(object):
+    """Store user settings and validate against the schema for the Padova
+    CMD web app.
 
+    Parameters
+    ----------
+    f : stream-like
+        A file stream to the TOML settings file.
+    kwargs :
+        User settings
+    """
+    def __init__(self, f, **kwargs):
+        super(Settings, self).__init__()
+        d = toml.load(f)
+        # Ordering is import to consistently build a hash for caching
+        self._schema = OrderedDict(sorted(d.items(), key=lambda t: t[0]))
+        self._aliases = self._index_aliases()
+        self._user_settings = {}
+        # Self-validate
+        self.validate()
+        # Add any user settings
+        self.update(kwargs)
 
-PHOT = {
-    "2mass_spitzer": " 2MASS + Spitzer (IRAC+MIPS)",
-    "2mass_spitzer_wise": " 2MASS + Spitzer (IRAC+MIPS) + WISE",
-    "2mass": " 2MASS JHKs",
-    "ubvrijhk": "UBVRIJHK (cf. Maiz-Apellaniz 2006 + Bessell 1990)",
-    "bessell": "UBVRIJHKLMN (cf. Bessell 1990 + Bessell & Brett 1988)",
-    "akari": "AKARI",
-    "batc": "BATC",
-    "megacam": "CFHT/Megacam u*g'r'i'z'",
-    "dcmc": "DCMC",
-    "denis": "DENIS",
-    "dmc14": "DMC 14 filters",
-    "dmc15": "DMC 15 filters",
-    "eis": "ESO/EIS (WFI UBVRIZ + SOFI JHK)",
-    "wfi": "ESO/WFI",
-    "wfi_sofi": "ESO/WFI+SOFI",
-    "wfi2": "ESO/WFI2",
-    "galex": "GALEX FUV+NUV (Vega) + Johnson's UBV",
-    "galex_sloan": "GALEX FUV+NUV + SDSS ugriz (all AB) ",
-    "UVbright": "HST+GALEX+Swift/UVOT UV filters",
-    "acs_hrc": "HST/ACS HRC",
-    "acs_wfc": "HST/ACS WFC",
-    "nicmosab": "HST/NICMOS AB",
-    "nicmosst": "HST/NICMOS ST",
-    "nicmosvega": "HST/NICMOS vega",
-    "stis": "HST/STIS imaging mode",
-    "wfc3ir": "HST/WFC3 IR channel (final throughputs)",
-    "wfc3uvis1": "HST/WFC3 UVIS channel, chip 1 (final throughputs)",
-    "wfc3uvis2": "HST/WFC3 UVIS channel, chip 2 (final throughputs)",
-    "wfc3_medium": "HST/WFC3 medium filters (UVIS1+IR, final throughputs)",
-    "wfc3": "HST/WFC3 wide filters (UVIS1+IR, final throughputs)",
-    "wfpc2": "HST/WFPC2 (Vega, cf. Holtzman et al. 1995)",
-    "kepler": "Kepler + SDSS griz + DDO51 (in AB)",
-    "kepler_2mass": "Kepler + SDSS griz + DDO51 (AB) + 2MASS (~Vega)",
-    "ogle": "OGLE-II",
-    "panstarrs1": "Pan-STARRS1",
-    "sloan": "SDSS ugriz",
-    "sloan_2mass": "SDSS ugriz + 2MASS JHKs",
-    "sloan_ukidss": "SDSS ugriz + UKIDSS ZYJHK",
-    "swift_uvot": "SWIFT/UVOT UVW2, UVM2, UVW1,u (Vega) ",
-    "spitzer": "Spitzer IRAC+MIPS",
-    "stroemgren": "Stroemgren-Crawford",
-    "suprimecam": "Subaru/Suprime-Cam (AB)",
-    "tycho2": "Tycho VTBT",
-    "ukidss": "UKIDSS ZYJHK (Vega)",
-    "visir": "VISIR",
-    "vista": "VISTA ZYJHKs (Vega)",
-    "washington": "Washington CMT1T2",
-    "washington_ddo51": "Washington CMT1T2 + DDO51"}
+    @classmethod
+    def load_package_settings(cls, name="cmd_2_6.toml", **kwargs):
+        """Load a settings file that ships with `Padova`.
 
+        Parameters
+        ----------
+        name : str
+            Name of the TOML file.
+        kwargs :
+            User settings
+        """
+        f = resource_stream(__name__,
+                            os.path.join("data", "settings", name))
+        return cls(f, **kwargs)
 
-# available tracks
-MODELS = {
-    'parsec12s': ('parsec_CAF09_v1.2S',
-                  'PARSEC version 1.2S,  Tang et al. (2014), '
-                  'Chen et al. (2014)'),
-    'parsec11': ('parsec_CAF09_v1.1',
-                 'PARSEC version 1.1, With revised diffusion+overshooting in '
-                 'low-mass stars, and improvements in interpolation scheme.'),
-    'parsec10': ('parsec_CAF09_v1.0', 'PARSEC version 1.0'),
-    '2010': ('gi10a',
-             'Marigo et al. (2008) with the Girardi et al. (2010) '
-             'Case A correction for low-mass, low-metallicity AGB tracks'),
-    '2010b': ('gi10b',
-              'Marigo et al. (2008) with the Girardi et al. (2010) '
-              'Case B correction for low-mass, low-metallicity AGB tracks'),
-    '2008': ('ma08',
-             'Marigo et al. (2008): Girardi et al. (2000) up to early-AGB '
-             '+ detailed TP-AGB from Marigo & Girardi (2007) '
-             '(for M <= 7 Msun) + Bertelli et al. (1994) (for M > 7 Msun) + '
-             'additional Z=0.0001 and Z=0.001 tracks.'),
-    '2002': ('gi2000',
-             'Basic set of Girardi et al. (2002) : Girardi et al. (2000) '
-             '+ simplified TP-AGB (for M <= 7 Msun) '
-             '+ Bertelli et al. (1994) (for M > 7 Msun) '
-             '+ additional Z=0.0001 and Z=0.001 tracks.')
-}
+    def _index_aliases(self):
+        """Build a hash of alias names back to full names."""
+        aliases = {}
+        for k, table in self._schema.iteritems():
+            if 'alias' in table:
+                aliases[table['alias']] = k
+        return aliases
 
+    def _resolve_key(self, k):
+        if k in self._schema:
+            key = k
+        elif k in self._aliases:
+            key = self._aliases[k]
+        else:
+            raise KeyError('Unknown settings key: {0}'.format(k))
+        return key
 
-CARBON_STARS = {
-    'loidl': ('loidl01',
-              'Loidl et al. (2001) (as in Marigo et al. (2008) and '
-              'Girardi et al. (2008))'),
-    'aringer': ('aringer09',
-                "Aringer et al. (2009) (Note: The interpolation scheme has "
-                "been slightly improved w.r.t. to the paper's Fig. 19.")
-}
+    def _format_value(self, key, table, v):
+        if 'format' in table:
+            return table['format'].format(**{key: v})
+        else:
+            return v
 
+    def _validate(self, key, v):
+        k = self._resolve_key(key)
+        table = self._schema[k]
+        if table['kind'] == 'static':
+            assert v == table['default'], 'Cannot override {0}'.format(key)
+        elif table['kind'] == 'choices':
+            assert v in table['choices'], '{0}: {1} invalid'.format(key, v)
+        elif table['kind'] == 'range':
+            r = table['range']
+            assert (v >= min(r)) and (v <= max(r)), '{0}: {1} outside range'.\
+                format(key, v)
 
-CIRCUM_MSTARS = {
-    'nodustM': ('no dust', ''),
-    'sil': ('Silicates', 'Bressan et al. (1998)'),
-    'AlOx': ('100% AlOx', 'Groenewegen (2006)'),
-    'dpmod60alox40': ('60% Silicate + 40% AlOx', 'Groenewegen (2006)'),
-    'dpmod': ('100% Silicate', 'Groenewegen (2006)')
-}
+    def validate(self):
+        """Validates all settings: defaults or user overrides."""
+        for k, v in self.iteritems():
+            self._validate(k, v)
 
+    def __setattr__(self, name, value):
+        # Attempt to add a user's setting as an attribute
+        try:
+            k = self._resolve_key(name)
+            self._validate(k, value)
+            self._user_settings[k] = value
+        except (AttributeError, KeyError):
+            super(Settings, self).__setattr__(name, value)
 
-CIRCUM_CSTARS = {
-    'nodustC': ('no dust', ''),
-    'gra': ('Graphites', 'Bressan et al. (1998)'),
-    'AMC': ('100% AMC', 'Groenewegen (2006)'),
-    'AMCSIC15': ('85% AMC + 15% SiC', 'Groenewegen (2006)')
-}
+    def __delattr__(self, name):
+        # Attempt to delete a user's setting first
+        try:
+            k = self._resolve_key(name)
+            if k in self._user_settings:
+                del self._user_settings[k]
+        except KeyError:
+            super(Settings, self).__delattr__(name)
 
+    def __len__(self):
+        return len(self._schema)
 
-ISOC_VAL = {
-    0: ('Single isochrone', ''),
-    1: ('Sequence of isochrones at constant Z', ''),
-    2: ('Sequence of isochrones at constant t (variable Z)',
-        'Groenewegen (2006)')
-}
+    def __getitem__(self, key):
+        k = self._resolve_key(key)
+        try:
+            return self._user_settings[k]
+        except KeyError:
+            return self._schema[k]['default']
 
+    def __setitem__(self, key, value):
+        k = self._resolve_key(key)
+        self._validate(k, value)
+        self._user_settings[k] = value
 
-# NOTE these settings are specific to v2.3 of CMD
-def get_defaults():
-    v = (('binary_frac', 0.3),
-         ('binary_kind', 1),
-         ('binary_mrinf', 0.7),
-         ('binary_mrsup', 1),
-         ('cmd_version', 2.3),  # TODO update to keep track with web service?
-         ('dust_source', 'nodust'),
-         ('dust_sourceC', 'AMCSIC15'),
-         ('dust_sourceM', 'dpmod60alox40'),
-         ('eta_reimers', 0.2),
-         ('extinction_av', 0),
-         ('icm_lim', 4),
-         ('imf_file', 'tab_imf/imf_chabrier_lognormal.dat'),
-         ('isoc_age', 1e7),
-         ('isoc_age0', 12.7e9),
-         ('isoc_dlage', 0.05),
-         ('isoc_dz', 0.0001),
-         ('isoc_kind', 'parsec_CAF09_v1.2S'),
-         ('isoc_lage0', 6.6),
-         ('isoc_lage1', 10.13),
-         ('isoc_val', 0),
-         ('isoc_z0', 0.0001),
-         ('isoc_z1', 0.03),
-         ('isoc_zeta', 0.02),
-         ('isoc_zeta0', 0.008),
-         ('kind_cspecmag', 'aringer09'),
-         ('kind_dust', 0),
-         ('kind_interp', 1),
-         ('kind_mag', 2),
-         ('kind_postagb', -1),
-         ('kind_pulsecycle', 0),
-         ('kind_tpagb', 3),
-         ('lf_deltamag', 0.2),
-         ('lf_maginf', 20),
-         ('lf_magsup', -20),
-         ('mag_lim', 26),
-         ('mag_res', 0.1),
-         ('output_evstage', 0),
-         ('output_gzip', 0),
-         ('output_kind', 0),
-         ('photsys_file', 'tab_mag_odfnew/tab_mag_bessell.dat'),
-         ('photsys_version', 'yang'),
-         ('submit_form', 'Submit'))
-    return OrderedDict(v)
+    def __delitem__(self, key):
+        # Only delete user settings
+        k = self._resolve_key(key)
+        if k in self._user_settings:
+            del self._user_settings[k]
 
+    def __hash__(self):
+        """Build a hash given the current settings."""
+        # String to build hash against
+        q = urlencode(self.settings)
+        m = hashlib.md5()
+        m.update(q)
+        return m.hexdigest()
 
-def validate_settings(s):
-    """Provide rudimentary validation of a settings dictionary."""
-    _defaults = get_defaults()
-    # No more or fewer keys than are known
-    known_keys = set(_defaults.keys())
-    key_set = set(s.keys())
-    # print known_keys.symmetric_difference(key_set)
-    assert key_set == known_keys
+    @property
+    def defaults(self):
+        """A dict of the formatted default settings."""
+        defs = OrderedDict()
+        for k, table in self._schema.iteritems():
+            key = self._resolve_key(k)
+            v = table['default']
+            val = self._format_value(key, table, v)
+            defs[key] = val
+        return defs
 
-    assert in_range(s['binary_frac'], 0., 1.)
-    assert s['binary_kind'] == _defaults['binary_kind']
-    assert s['binary_mrinf'] == _defaults['binary_mrinf']
-    assert s['binary_mrsup'] == _defaults['binary_mrsup']
-    assert s['cmd_version'] == _defaults['cmd_version']
-    assert s['dust_source'] == _defaults['dust_source']
-    assert s['dust_sourceC'] in CIRCUM_CSTARS
-    assert s['dust_sourceM'] in CIRCUM_MSTARS
-    assert in_range(s['eta_reimers'], 0., 0.5)  # Could go higher
-    assert s['extinction_av'] >= 0.
-    assert s['icm_lim'] == _defaults['icm_lim']
-    assert s['imf_file'] == _defaults['imf_file']  # FIXME allow options
-    assert in_range(s['isoc_age'], 1e6, 14e9)  # FIXME unknown limits here
-    assert in_range(s['isoc_age0'], 1e6, 14e9)
-    assert s['isoc_dlage'] > 0.
-    assert s['isoc_dz'] > 0.
-    assert s['isoc_kind'] in [v[0] for k, v in MODELS.iteritems()]
-    assert in_range(s['isoc_lage0'], 6.6, 10.13)
-    assert in_range(s['isoc_lage1'], 6.6, 10.13)
-    assert s['isoc_val'] in ISOC_VAL
-    assert in_range(s['isoc_z0'], 0.0001, 0.03)
-    assert in_range(s['isoc_z1'], 0.0001, 0.03)
-    assert in_range(s['isoc_zeta'], 0.0001, 0.03)
-    assert in_range(s['isoc_zeta0'], 0.0001, 0.03)
-    assert s['kind_cspecmag'] in [v[0] for k, v in CARBON_STARS.iteritems()]
-    assert s['kind_dust'] == _defaults['kind_dust']
-    assert s['kind_interp'] in [v for k, v in INTERP.iteritems()]
-    assert s['kind_mag'] == _defaults['kind_mag']
-    assert s['kind_postagb'] == _defaults['kind_postagb']
-    assert s['kind_pulsecycle'] == _defaults['kind_pulsecycle']
-    assert s['lf_deltamag'] > 0.
-    assert in_range(s['lf_maginf'], -30, 30)
-    assert in_range(s['lf_magsup'], -30, 30)
-    assert s['mag_lim'] == _defaults['mag_lim']
-    assert s['mag_res'] == _defaults['mag_res']
-    assert s['output_evstage'] in [0, 1]
-    assert s['output_gzip'] == _defaults['output_gzip']  # TODO allow
-    assert s['output_kind'] in [0, 2]  # TODO allow LFs?
-    # assert s['photsys_version'] == _defaults['photsys_version']  # FIXME
-    # assert s['photsys_file'] in
-    assert s['submit_form'] == _defaults['submit_form']
+    @property
+    def settings(self):
+        """A dict of the formatted settings (including user settings)."""
+        s = OrderedDict()
+        for k, v in self.iteritems():
+            table = self._schema[k]
+            s[k] = self._format_value(k, table, v)
+        return s
 
+    def iteritems(self):
+        """Iterate through all setting key-value pairs.
 
-def in_range(value, min_val, max_val):
-    if value > max_val:
-        print value, "max", max_val
-        return False
-    if value < min_val:
-        print value, "min", min_val
-        return False
-    return True
+        Note: the values are *unformatted*.
+        """
+        for k, table in self._schema.iteritems():
+            if k in self._user_settings:
+                yield k, self._user_settings[k]
+            else:
+                yield k, table['default']
+
+    def update(self, h):
+        """Update the user settings with a dict-like."""
+        for k, v in h.iteritems():
+            key = self._resolve_key(k)
+            self._validate(key, v)
+            self._user_settings[key] = v
