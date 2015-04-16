@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from __future__ import (print_function, division, absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import *  # NOQA
 from setuptools import setup, find_packages
 import os
 import codecs
@@ -19,7 +24,7 @@ def read(filename):
     full_filename = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
         filename)
-    return unicode(codecs.open(full_filename, encoding='utf-8').read())
+    return str(codecs.open(full_filename, encoding='utf-8').read())
 
 long_description = '\n\n'.join([read('README.rst'),
                                 read('CHANGES.rst')])
@@ -54,7 +59,7 @@ setup(
                    'pytest-cov'],
 
     package_data={
-        'padova': ['data/settings/cmd_2_6.toml'],
+        'padova': ['data/settings/*.toml'],
     },
 
     # To provide executable scripts, use entry points in preference to the
