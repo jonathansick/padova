@@ -9,7 +9,7 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-from astropy.table import Table
+from astropy.table import Table, join
 
 from padova.basereader import BaseReader
 
@@ -154,14 +154,20 @@ class Isochrone(Table):
     def filter_names(self):
         """A list of (column) names of the filters included in this isochrone.
         """
-        non_mag_cnames = ['log(age/yr)', 'M_ini', 'M_act', 'logL/Lo', 'logTe',
-                          'logG', 'mbol', 'C/O', 'M_hec', 'period', 'pmode',
-                          'logMdot',
-                          'int_IMF', 'stage',
-                          'Z', 'logageyr', 'logLLo']
+        _non_mag_names = self.non_mag_names
         # Normally I'd use sets, but column ordering is important
         return [name for name in self.colnames
-                if name not in non_mag_cnames]
+                if name not in _non_mag_names]
+
+    @property
+    def non_mag_names(self):
+        """A list of all column names that are not bandpasses."""
+        possible = ['log(age/yr)', 'M_ini', 'M_act', 'logL/Lo', 'logTe',
+                    'logG', 'mbol', 'C/O', 'M_hec', 'period', 'pmode',
+                    'logMdot',
+                    'int_IMF', 'stage',
+                    'Z', 'logageyr', 'logLLo']
+        return [n for n in possible if n in self.colnames]
 
     def export_for_starfish(self, output_dir, bands=None):
         """Export the isochrone in a format useful for StarFISH `mklib`.
@@ -198,3 +204,48 @@ class Isochrone(Table):
                    delimiter_pad=None,
                    bookend=False,
                    include_names=['M_ini'] + bandnames)
+
+
+def join_isochrones(left_isoc, right_isoc, right_bands=None, left_bands=None):
+    """Join two isochrone tables.
+
+    The expected use of this function is to combine filter sets (`photsys`)
+    in two isochrone tables.
+
+    Parameters
+    ----------
+    left_isoc : :class:`Isochrone`
+        Isochrone on the 'left-side' of the join
+    right_isoc : :class:`Isochrone`
+        Isochrone on the 'right-side' of the join
+    left_bands : list
+        Bands to keep from the left side isochrones. Defaults to all minus
+        those on the right side.
+    right_bands : list
+        Bands to keep from the right side isochrones. Defaults to all.
+
+    Returns
+    -------
+    t : :class:`Isochrone`
+        The joined isochrone table.
+    """
+    t_left = Isochrone(left_isoc)
+    t_right = Isochrone(right_isoc)
+    if right_bands is None:
+        left_bands = t_left.filter_names
+
+    if left_bands is not None:
+        removed_bands = list(set(t_left.filter_names)
+                             - set(left_bands))
+        t_left.remove_columns(removed_bands)
+
+    # Also remove bands from left that appear on the right
+    left_bands = t_left.filter_names
+    removed_bands = [b for b in left_bands if b in right_bands]
+    t_left.remove_columns(removed_bands)
+
+    # Trim the right table
+    t_right.keep_columns(['M_ini'] + right_bands)
+
+    t = Isochrone(join(t_left, t_right, join_type='left', keys='M_ini'))
+    return t
