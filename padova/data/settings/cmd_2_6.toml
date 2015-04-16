@@ -469,13 +469,14 @@ range = [0.000001, 1.0]  # FIXME
 [output_kind]
 slug = "Kind of output"
 default = "0"
-kind = "choices"
-[output_kind.choices."0"]
-slug = "Isochrone tables"
-[output_kind.choices."1"]
-slug = "Luminosity functions"
-[output_kind.choices."4"]
-slug = "SSP integrated magnitudes"
+kind = "static"
+# kind = "choices"
+# [output_kind.choices."0"]
+# slug = "Isochrone tables"
+# [output_kind.choices."1"]
+# slug = "Luminosity functions"
+# [output_kind.choices."4"]
+# slug = "SSP integrated magnitudes"
 
 [lf_maginf]
 alias = "lf_mag0"
