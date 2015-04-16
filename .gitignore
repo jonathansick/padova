@@ -35,3 +35,10 @@ distribute-*.tar.gz
 
 # Mac OSX
 .DS_Store
+
+.cache/
+.coverage
+.ipynb_checkpoints/
+.tox/
+notebooks/.ipynb_checkpoints/
+notebooks/here/
