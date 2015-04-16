@@ -61,7 +61,7 @@ class IsochroneSet(BaseReader):
         dt = []
         for cname in colnames:
             if cname == 'stage':
-                dt.append((cname, 'S40'))
+                dt.append((cname, np.int))
             elif cname == 'pmode':
                 dt.append((cname, np.int))
             else:
