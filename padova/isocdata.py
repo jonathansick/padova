@@ -4,6 +4,12 @@
 This :mod:`isocdata` module helps to read Padova isochrone table files,
 and split them into individual isochrones.
 """
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import *  # NOQA
 
 import os
 from collections import OrderedDict
@@ -30,7 +36,7 @@ class IsochroneSet(BaseReader):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         try:
             isoc = self._isochrones[self._current]
             self._current += 1
@@ -104,7 +110,7 @@ class IsochroneSet(BaseReader):
         header = header.replace('=', ' ')
         parts = header.split()[1:-1]
         vals = [float(p) for p in parts[1::2]]
-        meta = OrderedDict(zip(parts[::2], vals))
+        meta = OrderedDict(list(zip(parts[::2], vals)))
         return meta
 
 

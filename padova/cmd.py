@@ -4,7 +4,11 @@
 Python interface to the Padova group's CMD web interface for isochrones.
 """
 
-from __future__ import print_function, unicode_literals, division
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # NOQA
 
 from padova.settings import Settings
 from padova.interface import CMDRequest

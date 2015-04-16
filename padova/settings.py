@@ -6,16 +6,18 @@ CMD Settings.
 This module assists with documenting, validating and storing settings for
 the CMD web api.
 """
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+from builtins import *  # NOQA
 
-import sys
 import os
 from collections import OrderedDict
 import hashlib
 
-if sys.version_info[0] > 2:
-    from urllib.parse import urlencode
-else:
-    from urllib import urlencode
+from urllib.parse import urlencode
 
 from pkg_resources import resource_stream
 import pytoml as toml
@@ -36,7 +38,7 @@ class Settings(object):
         super(Settings, self).__init__()
         d = toml.load(f)
         # Ordering is import to consistently build a hash for caching
-        self._schema = OrderedDict(sorted(d.items(), key=lambda t: t[0]))
+        self._schema = OrderedDict(sorted(list(d.items()), key=lambda t: t[0]))
         self._aliases = self._index_aliases()
         self._user_settings = {}
         # Self-validate
@@ -62,7 +64,7 @@ class Settings(object):
     def _index_aliases(self):
         """Build a hash of alias names back to full names."""
         aliases = {}
-        for k, table in self._schema.iteritems():
+        for k, table in self._schema.items():
             if 'alias' in table:
                 aliases[table['alias']] = k
         return aliases
@@ -96,7 +98,7 @@ class Settings(object):
 
     def validate(self):
         """Validates all settings: defaults or user overrides."""
-        for k, v in self.iteritems():
+        for k, v in self.items():
             self._validate(k, v)
 
     def __setattr__(self, name, value):
@@ -150,7 +152,7 @@ class Settings(object):
     def defaults(self):
         """A dict of the formatted default settings."""
         defs = OrderedDict()
-        for k, table in self._schema.iteritems():
+        for k, table in self._schema.items():
             key = self._resolve_key(k)
             v = table['default']
             val = self._format_value(key, table, v)
@@ -161,17 +163,17 @@ class Settings(object):
     def settings(self):
         """A dict of the formatted settings (including user settings)."""
         s = OrderedDict()
-        for k, v in self.iteritems():
+        for k, v in self.items():
             table = self._schema[k]
             s[k] = self._format_value(k, table, v)
         return s
 
-    def iteritems(self):
+    def items(self):
         """Iterate through all setting key-value pairs.
 
         Note: the values are *unformatted*.
         """
-        for k, table in self._schema.iteritems():
+        for k, table in self._schema.items():
             if k in self._user_settings:
                 yield k, self._user_settings[k]
             else:
@@ -179,7 +181,7 @@ class Settings(object):
 
     def update(self, h):
         """Update the user settings with a dict-like."""
-        for k, v in h.iteritems():
+        for k, v in h.items():
             key = self._resolve_key(k)
             self._validate(key, v)
             self._user_settings[key] = v

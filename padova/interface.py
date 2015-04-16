@@ -6,23 +6,18 @@ Maps for cmd interface settings
 Code adapted from ezpadova - Morgan Fousneau, MIT License
 """
 
-from __future__ import print_function, unicode_literals, division
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import bytes
+from builtins import object
+from builtins import *  # NOQA
 
-import sys
-
-if sys.version_info[0] > 2:
-    py3k = True
-    from urllib.parse import urlencode
-    from urllib import request
-    from urllib.request import urlopen
-    from io import StringIO
-    from html import parser
-else:
-    py3k = False
-    from urllib import urlencode
-    from urllib2 import urlopen
-    from StringIO import StringIO
-    import HTMLParser as parser
+from urllib.parse import urlencode
+from urllib.request import urlopen
+from io import StringIO
+import html.parser
 
 import zlib
 import re
@@ -61,11 +56,7 @@ class CMDRequest(object):
         # print('Requesting from {0}...'.format(webserver))
         url = webserver + '/cgi-bin/cmd'
         q = urlencode(self.settings.settings)
-        if py3k:
-            req = request.Request(url, q.encode('utf8'))
-            c = urlopen(req).read().decode('utf8')
-        else:
-            c = urlopen(url, q).read()
+        c = urlopen(url, q).read()
         # Find the output dataset URL in the HTML that CMD returns
         aa = re.compile('output\d+')
         fname = aa.findall(c)
@@ -102,7 +93,7 @@ class CMDRequest(object):
         return self._r
 
 
-class CMDErrorParser(parser.HTMLParser):
+class CMDErrorParser(html.parser.HTMLParser):
     """Find error box in the recent version of CMD website."""
     def handle_starttag(self, tag, attrs):
         if (tag == "p") & (dict(attrs).get('class', None) == 'errorwarning'):

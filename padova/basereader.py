@@ -3,6 +3,13 @@
 """
 Tools for reading CMD-interface tables outputs.
 """
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+from builtins import *  # NOQA
 
 from collections import deque
 
@@ -35,7 +42,7 @@ class BaseReader(object):
                 # Close the block
                 block['start'] = i
                 block['header_lines'] = [hdeque.pop()
-                                         for j in xrange(n_header_lines)][::-1]
+                                         for j in range(n_header_lines)][::-1]
                 data_blocks.append(block)
 
                 # Treat excess header lines as a global header

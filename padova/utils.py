@@ -3,6 +3,11 @@
 """
 Utilities
 """
+from __future__ import (unicode_literals, print_function, division,
+                        absolute_import)
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *  # NOQA
 
 
 def compression_type(filename, stream=False):
@@ -19,11 +24,11 @@ def compression_type(filename, stream=False):
     if not stream:
         with open(filename) as f:
             file_start = f.read(max_len)
-        for magic, filetype in magic_dict.items():
+        for magic, filetype in list(magic_dict.items()):
             if file_start.startswith(magic):
                 return filetype
     else:
-        for magic, filetype in magic_dict.items():
+        for magic, filetype in list(magic_dict.items()):
             if filename[:len(magic)] == magic:
                 return filetype
 
