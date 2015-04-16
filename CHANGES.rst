@@ -6,6 +6,7 @@ Changelog
 ------------------
 
 - DOI badge courtesy of Zenodo
+- Add badges courtesy of `PyPI Pins <https://pypip.in>`_
 
 
 0.1.2 (2015-04-15)

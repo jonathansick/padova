@@ -4,15 +4,30 @@ Padova
 
 .. image:: https://zenodo.org/badge/10943/jonathansick/padova.svg
     :target: http://dx.doi.org/10.5281/zenodo.16869
+    :alt: Digital Object Identifier (DOI)
+
+.. image:: https://pypip.in/license/padova/badge.svg
+    :target: https://pypi.python.org/pypi/padova/
+    :alt: License
 
 .. image:: https://travis-ci.org/jonathansick/padova.svg?branch=master
     :target: https://travis-ci.org/jonathansick/padova
 
-.. image:: https://badge.fury.io/py/padova.png
-    :target: http://badge.fury.io/py/padova
+.. image:: https://pypip.in/version/padova/badge.svg?text=version
+    :target: https://pypi.python.org/pypi/padova/
+    :alt: Latest Version
 
-.. image:: https://pypip.in/d/padova/badge.png
-    :target: https://pypi.python.org/pypi/padova
+.. image:: https://pypip.in/status/padova/badge.svg
+    :target: https://pypi.python.org/pypi/padova/
+    :alt: Development Status
+
+.. image:: https://pypip.in/py_versions/padova/badge.svg
+    :target: https://pypi.python.org/pypi/padova/
+    :alt: Supported Python versions
+
+.. image:: https://pypip.in/format/padova/badge.svg
+    :target: https://pypi.python.org/pypi/padova/
+    :alt: Download format
 
 Padova is a small python package for working with the so-called `Padova evolutionary tracks <http://stev.oapd.inaf.it/cgi-bin/cmd>`_ produced by Girardi and collaborators.
 Padova is compatible with the `Astropy`_ project.
