@@ -206,6 +206,39 @@ class Isochrone(Table):
                    include_names=['M_ini'] + bandnames)
 
 
+def join_isochrone_sets(left_set, right_set,
+                        right_bands=None, left_bands=None):
+    """Join two isochrone sets
+
+    The expected use of this function is to combine filter sets (`photsys`)
+    in two isochrone requests that otherwise have the same settings.
+
+    Parameters
+    ----------
+    left_set : :class:`IsochroneSet`
+        IsochroneSet on the 'left-side' of the join
+    right_set : :class:`IsochroneSet`
+        IsochroneSet on the 'right-side' of the join
+    left_bands : list
+        Bands to keep from the left side isochrones. Defaults to all minus
+        those on the right side.
+    right_bands : list
+        Bands to keep from the right side isochrones. Defaults to all.
+
+    Returns
+    -------
+    left_set : :class:`IsochroneSet`
+        The joined-and-modified left isochrone set
+    """
+    itr = enumerate(zip(left_set.isochrones, right_set.isochrones))
+    for i, (left_isoc, right_isoc) in itr:
+        new_isoc = join_isochrones(left_isoc, right_isoc,
+                                   right_bands=right_bands,
+                                   left_bands=left_bands)
+        left_set._isochrones[i] = new_isoc
+    return left_set
+
+
 def join_isochrones(left_isoc, right_isoc, right_bands=None, left_bands=None):
     """Join two isochrone tables.
 
