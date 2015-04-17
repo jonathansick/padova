@@ -192,18 +192,17 @@ class Isochrone(Table):
             os.remove(output_path)
         fmt = {'m_ini': "%10.7f"}  # table writer formatting
         if bands is None:
-            bandnames = self.filter_names
-            for name in bandnames:
-                fmt[name] = "%8.6f"
-        else:
-            bandnames = [n for n in bands if n in self.filter_names]
-        self.write(output_path,
-                   format='ascii.fixed_width_no_header',
-                   formats=fmt,
-                   delimiter=' ',
-                   delimiter_pad=None,
-                   bookend=False,
-                   include_names=['M_ini'] + bandnames)
+            bands = self.filter_names
+        fmt.update({name: "%8.6f" for name in bands})
+        t = Isochrone(self)
+        t.keep_columns(['M_ini'] + bands)
+        t.write(output_path,
+                format='ascii.fixed_width_no_header',
+                formats=fmt,
+                delimiter=' ',
+                delimiter_pad=None,
+                bookend=False,
+                include_names=['M_ini'] + bands)
 
 
 def join_isochrone_sets(left_set, right_set,
