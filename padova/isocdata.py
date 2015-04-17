@@ -190,19 +190,23 @@ class Isochrone(Table):
             os.makedirs(output_dir)
         if os.path.exists(output_path):
             os.remove(output_path)
+
         fmt = {'m_ini': "%10.7f"}  # table writer formatting
         if bands is None:
             bands = self.filter_names
         fmt.update({name: "%8.6f" for name in bands})
+
+        # Make a table copy with only needed bands, in proper order
+        written_columns = ['M_ini'] + bands
         t = Isochrone(self)
-        t.keep_columns(['M_ini'] + bands)
+        t = t[written_columns]
+        assert t.colnames == written_columns
         t.write(output_path,
                 format='ascii.fixed_width_no_header',
                 formats=fmt,
                 delimiter=' ',
                 delimiter_pad=None,
-                bookend=False,
-                include_names=['M_ini'] + bands)
+                bookend=False)
 
 
 def join_isochrone_sets(left_set, right_set,
